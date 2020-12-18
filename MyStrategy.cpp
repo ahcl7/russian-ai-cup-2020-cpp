@@ -1,4 +1,7 @@
 #include "MyStrategy.hpp"
+#include "Constances.hpp"
+#include "Utils.hpp"
+#include "Manager.hpp"
 #include <exception>
 #include <iostream>
 #include <map>
@@ -13,136 +16,16 @@ using namespace std;
 #define BOT 2
 #define DIA 3
 
-enum BUILDER_STATUS {
-    WAITING = 1,
-    REPAIRING = 2,
-    BUILDING = 3,
-    MINING = 4
-};
-
-
-
 MyStrategy::MyStrategy() {}
 
-const int SCOUT_TIME = 50;
 
-const int INF = 1e5;
-
-const int DEFEND_RANGE = 25;
-
-const int DEATH_NUM = 4;
-
-const int BASE_CENTER = 10;
-
-const double RATE = 4;
-
-const int REPAIRER_INVOLVE_NUMBER = 3;
-
-const int POPULATION_BACKUP_QUANTITY = 5;
-
-const int MAXIMUM_NUMBER_DEFENDER = 15;
-
-const int MAX_NUM_BUILDER_UNIT = 50;
-
-const int MIN_BUILDERS = 5;
 
 map<int, int> playersPosition;
+Manager manager = Manager();
 
-//validated
-int distance(Vec2Int a, Vec2Int b) {
-    return abs(a.x - b.x) + abs(a.y - b.y);
-}
-//validated
-int distance(Entity a, Entity b) {
-    return distance(a.position, b.position);
-}
-//validated
-int sqr(int x) {
-    return x * x;
-}
-//validated
-int distance2(Vec2Int a, Vec2Int b) {
-    return sqr(a.x - b.x) + sqr(a.y - b.y);
-}
-//validated
-bool intersect(int l, int r, int u, int v) {
-    int L = std::max(l, u);
-    int R = std::min(r, v);
-    return (L <= R);
-}
-//validated
-bool intersect(Vec2Int a, int sa, Vec2Int b, int sb) {
-    bool res = intersect(a.x, a.x + sa - 1, b.x, b.x + sb - 1);
-    res &= intersect(a.y, a.y + sa - 1, b.y, b.y + sb - 1);
-    return res;
-}
-//validated
 
-vector <Vec2Int> getPossiblePositions(const PlayerView &playerView, EntityType entityType) {
-    int mapSize = playerView.mapSize;
-    int entitySize = playerView.entityProperties.at(entityType).size;
-    vector<bitset<150>> ma(mapSize + 10);
-    for(int i = 0 ; i < playerView.entities.size(); i++) {
-        const Entity& entity = playerView.entities[i];
-        EntityType entityType = entity.entityType;
-        int sz = playerView.entityProperties.at(entityType).size;
-        Vec2Int pos = entity.position;
-        for(int j = 0; j < sz; j++) {
-            for(int k = 0; k < sz; k++) {
-                ma[pos.x + j].set(pos.y + k);
-            }
-        }
-    }
-    vector <Vec2Int> res;
-    for (int i = 1; i < mapSize - entitySize; i++) {
-        for (int j = 1; j < mapSize - entitySize; j++) {
-            bool ok = true;
-            for(int k = 0; k < entitySize && ok; k++) {
-                for(int l = 0; l < entitySize && ok; l++) {
-                    if (ma[i + k].test(j + l)) ok = false;
-                }
-            }
-            if (ok) {
-                res.push_back(Vec2Int(i, j));
-            }
-        }
-    }
-    return res;
-}
-
-bool isAdjacent(Vec2Int a, Vec2Int b, int sz) {
-    for (int i = 0; i < sz; i++) {
-        for (int j = 0; j < sz; j++) {
-            int x = b.x + i;
-            int y = b.y + j;
-            if (abs(a.x - x) + abs(a.y - y) == 1) return true;
-        }
-    }
-    return false;
-}
 
 int mapSize;
-
-
-Vec2Int getTopCoordinate() {
-    return Vec2Int(BASE_CENTER, mapSize - BASE_CENTER);
-}
-
-Vec2Int getBotCoordinate() {
-    return Vec2Int(mapSize - BASE_CENTER, BASE_CENTER);
-}
-
-Vec2Int getDiaCoordinate() {
-    return Vec2Int(mapSize - BASE_CENTER, mapSize - BASE_CENTER);
-}
-
-Vec2Int getBaseCoordinate() {
-    return Vec2Int(BASE_CENTER, BASE_CENTER);
-}
-
-Vec2Int getCenterCoordinate() {
-    return Vec2Int(mapSize / 2, mapSize / 2);
-}
 
 Vec2Int getCoordinateByLane(int p) {
     if (p == TOP) return getTopCoordinate();
@@ -254,6 +137,11 @@ pair<int, Vec2Int> getOptimizePosition(const PlayerView& playerView, EntityType 
 }
 
 Action MyStrategy::getAction(const PlayerView &playerView, DebugInterface *debugInterface) {
+    if (Utils::mapSize == 0) {
+        Utils::mapSize = playerView.mapSize;
+    }
+    if (Utils::entityProperties.empty()) Utils::entityProperties = playerView.entityProperties;
+    Utils::myId = playerView.myId;
     builderInvolved.clear();
     mapSize = playerView.mapSize;
     Action result = Action(std::unordered_map<int, EntityAction>());
@@ -419,32 +307,32 @@ Action MyStrategy::getAction(const PlayerView &playerView, DebugInterface *debug
         if (properties.canMove) {
             // melee, ranged, builder units
             if (entity.entityType == BUILDER_UNIT) {
-
-                if (repairer.count(entity.id)) {
-                    int baseId = repairer[entity.id];
-                    int baseSize = playerView.entityProperties.at(bases[baseId].entityType).size;
-                    Vec2Int basePosition = bases[baseId].position;
-                    if (isAdjacent(entity.position, basePosition, baseSize))
-                        repairAction = std::shared_ptr<RepairAction>(new RepairAction(repairer[entity.id]));
-                    else
-                        moveAction = std::shared_ptr<MoveAction>(new MoveAction(
-                                Vec2Int(basePosition.x + baseSize / 2, basePosition.y + baseSize / 2),
-                                true,
-                                true));
-                } else if (baseBuildingTasks.count(entity.id)) {
-                    EntityType type = baseBuildingTasks[entity.id].first;
-                    Vec2Int position = baseBuildingTasks[entity.id].second;
-                    buildAction = std::shared_ptr<BuildAction>(new BuildAction(type,
-                                                                               position));
-                    std::cerr << "BUILD " << housePosition.x << " " << housePosition.y << std::endl;
-                    std::cerr << "CurPos" << entity.position.x << " " << entity.position.y << std::endl;
-                    totalPopulationProvide += 5;
-                } else {
-                    moveAction = std::shared_ptr<MoveAction>(new MoveAction(
-                            Vec2Int(playerView.mapSize / 3, playerView.mapSize - 1),
-                            true,
-                            true));
-                }
+                EntityAction action = manager.getActionForBuilder(entity.id);
+//                if (repairer.count(entity.id)) {
+//                    int baseId = repairer[entity.id];
+//                    int baseSize = playerView.entityProperties.at(bases[baseId].entityType).size;
+//                    Vec2Int basePosition = bases[baseId].position;
+//                    if (isAdjacent(entity.position, basePosition, baseSize))
+//                        repairAction = std::shared_ptr<RepairAction>(new RepairAction(repairer[entity.id]));
+//                    else
+//                        moveAction = std::shared_ptr<MoveAction>(new MoveAction(
+//                                Vec2Int(basePosition.x + baseSize / 2, basePosition.y + baseSize / 2),
+//                                true,
+//                                true));
+//                } else if (baseBuildingTasks.count(entity.id)) {
+//                    EntityType type = baseBuildingTasks[entity.id].first;
+//                    Vec2Int position = baseBuildingTasks[entity.id].second;
+//                    buildAction = std::shared_ptr<BuildAction>(new BuildAction(type,
+//                                                                               position));
+//                    std::cerr << "BUILD " << housePosition.x << " " << housePosition.y << std::endl;
+//                    std::cerr << "CurPos" << entity.position.x << " " << entity.position.y << std::endl;
+//                    totalPopulationProvide += 5;
+//                } else {
+//                    moveAction = std::shared_ptr<MoveAction>(new MoveAction(
+//                            Vec2Int(playerView.mapSize / 3, playerView.mapSize - 1),
+//                            true,
+//                            true));
+//                }
             } else {
                 if (defenders.count(entity.id)) {
                     moveAction = std::shared_ptr<MoveAction>(new MoveAction(
