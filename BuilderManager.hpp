@@ -23,15 +23,12 @@ private:
 public:
 
     InformationForBuilderManager infoFBM;
-
-    BuilderManager(const PlayerView& playerView) {
-        informationForBuilderManager = InformationForBuilderManager();
-        this->update(playerView);
-    }
+    BuilderManager() {};
+    BuilderManager(const PlayerView& playerView);
     EntityAction getAction(int entityId);
     void createAndAssignTasks();
     void update(const PlayerView& playerView);
-    void implement(vector<Entity> buildersCanBeInvolvedForTasks, vector<BuilderTask> tasks, vector<pair<int,int>> assignment)
+    void implement(vector<Entity> buildersCanBeInvolvedForTasks, vector<BuilderTask> tasks, vector<pair<int,int>> assignment);
 };
 
 #endif //AICUP_CPP_BUILDERMANAGER_HPP

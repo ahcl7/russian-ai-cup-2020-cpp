@@ -60,7 +60,7 @@ Vec2Int Utils::getCenterCoordinate() {
 }
 
 bool Utils::isMyEntity(Entity entity) {
-    return (entity.playerId != nullptr && entity.id == myId);
+    return (entity.playerId != nullptr && *entity.playerId == myId);
 }
 
 bool Utils::isInactiveEntity(Entity entity) {
@@ -73,4 +73,13 @@ Vec2Int Utils::getResourceOptimalCoordinate() {
 }
 int Utils::getEntitySize(EntityType entityType) {
     return entityProperties.at(entityType).size;
+}
+int Utils::getEntityCost(EntityType entityType) {
+    return entityProperties.at(entityType).initialCost;
+}
+int Utils::getEntitySightRange(EntityType entityType) {
+    return entityProperties.at(entityType).sightRange;
+}
+EntityProperties Utils::getEntityProperties(EntityType entityType) {
+    return entityProperties.at(entityType);
 }

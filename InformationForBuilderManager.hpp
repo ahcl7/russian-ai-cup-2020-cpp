@@ -12,14 +12,6 @@
 
 using namespace std;
 
-enum BuilderStatus {
-    WAITING = 1,
-    MOVING = 2,
-    COLLECTING = 3,
-    BUILDING = 4,
-    REPAIRING = 5
-};
-
 enum TaskPriority {
     IMMEDIATE = 3,
     AS_SOON_AS_POSSIBLE = 2,
@@ -30,16 +22,25 @@ enum TaskType {
     BUILD = 1,
     REPAIR = 2,
     COLLECT_RESOURCE = 3,
-    NONE = 4;
+    NONE = 4
 };
 
 class BuilderTask {
+public:
     TaskType taskType;
     int numberOfBuildersShouldBeInvolved;
     int targetId;
     EntityType targetEntityType;
     TaskPriority priority;
     Vec2Int targetPosition;
+    BuilderTask() {
+        taskType = NONE;
+        numberOfBuildersShouldBeInvolved = 0;
+        targetId = -1;
+        targetEntityType = HOUSE;
+        priority = CAN_BE_DELAYED;
+        targetPosition = SPECIAL_POINT;
+    }
     BuilderTask(TaskType taskType1, int numberOfBuildersShouldBeInvolved1 = 1,  TaskPriority priority1 = CAN_BE_DELAYED, int targetId1 = -1, EntityType targetEntityType1 = HOUSE,
                 Vec2Int targetPosition1 = SPECIAL_POINT) {
         taskType = taskType1;
@@ -63,15 +64,14 @@ public:
     BitMap bitmap;
     map<int, Vec2Int> builderPositions;
     vector <Vec2Int> basePositions;
-    map<int, BuilderStatus> status;
     map<int, BuilderTask> doingTasks;
     vector<Entity> builders;
     vector<Entity> inactiveEntities;
     vector<Entity> resourcesEntities;
     vector<BuilderTask> currentBuildingTasks;
     int getNumberOfBuilderRepairingFor(int entityId);
+    InformationForBuilderManager() {};
     InformationForBuilderManager(const PlayerView &playerView);
-
     void update(const PlayerView &playerView);
     void updateBuilders(const PlayerView& playerView);
     bool isInactiveEntity(int entityId);

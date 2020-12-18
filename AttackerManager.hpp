@@ -8,6 +8,7 @@
 #include "model/Model.hpp"
 
 class AttackerManager {
+public:
     std::vector<Entity> attackers;
     std::vector<Entity> newAttackers;
     EntityAction getAction(int entityId);

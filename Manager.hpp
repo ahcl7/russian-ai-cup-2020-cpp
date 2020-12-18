@@ -14,10 +14,14 @@ public:
     BuilderManager builderManager;
     AttackerManager attackerManager;
     Manager() {};
-    EntityAction getActionForBuilder(int entityId) { return builderManager.getAction(entityId)};
-    EntityAction getActionForAttacker(int entityId) { return attackerManager.getAction(entityId)};
-    void update(PlayerView& playerView1) {
+    Manager(const PlayerView& playerView1) {
+        builderManager = BuilderManager(playerView1);
+    }
+    EntityAction getActionForBuilder(int entityId) { return builderManager.getAction(entityId);};
+    EntityAction getActionForAttacker(int entityId) { return attackerManager.getAction(entityId);};
+    void update(const PlayerView& playerView1) {
         this->playerView = playerView1;
+        builderManager.update(playerView1);
     };
 
 };

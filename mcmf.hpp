@@ -7,6 +7,7 @@
 
 #include <queue>
 #include <algorithm>
+#include <vector>
 
 using namespace std;
 
@@ -19,12 +20,12 @@ using namespace std;
 const int foo = (int) 1e9;
 const int coo = (int) 1e9;
 namespace MincostMaxflow {
-    const int maxv = 1e5 + 5;
-    const int maxe = 1e6 + 5;
-    int n, s, t, E;
-    int adj[maxe], nxt[maxe], lst[maxv], frm[maxv], vis[maxv];
-    int cap[maxe], flw[maxe], totalFlow;
-    int cst[maxe], dst[maxv], totalCost;
+    static const int maxv = 1e5 + 5;
+    static const int maxe = 1e6 + 5;
+    static int n, s, t, E;
+    static int adj[maxe], nxt[maxe], lst[maxv], frm[maxv], vis[maxv];
+    static int cap[maxe], flw[maxe], totalFlow;
+    static int cst[maxe], dst[maxv], totalCost;
 
     void init(int nn, int ss, int tt);
 

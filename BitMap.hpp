@@ -10,6 +10,7 @@
 #include "Utils.hpp"
 #include <vector>
 #include <bitset>
+#include <set>
 #include <unordered_map>
 
 using namespace std;
@@ -30,15 +31,8 @@ public:
     vector <vector<CellStatus>> bitmap_fow;
     vector <bitset<MAX_SIZE>> _bitmap;
     vector <vector<CellStatus>> _bitmap_fow;
-    BitMap(int n1) {
-        n = n1;
-        for (int i = 0; i < n; i++) {
-            bitmap.push_back(bitset<MAX_SIZE>(0));
-            bitmap_fow.push_back(vector<CellStatus>(MAX_SIZE, UNKNOWN));
-        }
-        _bitmap = bitmap;
-        _bitmap_fow = bitmap_fow;
-    }
+    BitMap() {};
+    BitMap(int n1);
 
     void update(const PlayerView &playerView);
 

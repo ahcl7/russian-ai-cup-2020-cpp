@@ -4,7 +4,7 @@
 #include "InformationForBuilderManager.hpp"
 
 
-InformationForBuilderManager::InformationForBuilderManager(const PlayerView &playerView) {
+InformationForBuilderManager::InformationForBuilderManager(const PlayerView& playerView) {
     currentResource = 0;
     currentPopulation = 0;
     providedPopulation = 0;
@@ -13,7 +13,6 @@ InformationForBuilderManager::InformationForBuilderManager(const PlayerView &pla
     numberOfRangedBase = 0;
     curTick = 0;
     bitmap = BitMap(playerView.mapSize);
-    entityProperties = playerView.entityProperties;
 };
 
 bool InformationForBuilderManager::isInactiveEntity(int entityId) {
@@ -27,11 +26,11 @@ void InformationForBuilderManager::updateBuilders(const PlayerView& playerView) 
     map<int, BuilderTask> newDoingTasks;
     vector<Entity> newBuilders;
     for(int i = 0 ; i < playerView.entities.size(); i++) {
-        Entity& entity = playerView.entities[i];
+        const Entity& entity = playerView.entities[i];
         if (!Utils::isMyEntity(entity) || entity.entityType != BUILDER_UNIT) continue;
         newBuilders.push_back(entity);
         int id = entity.id;
-        BuilderTask newTask = ;
+        BuilderTask newTask;
         if (!doingTasks.count(id)) {
             //this is new builder, set current task to 'collect resource'
             newTask = BuilderTask(COLLECT_RESOURCE);
@@ -58,6 +57,7 @@ void InformationForBuilderManager::updateBuilders(const PlayerView& playerView) 
                 }
             }
         }
+        newDoingTasks[entity.id] = newTask;
     }
     builders = newBuilders;
 }
@@ -78,13 +78,12 @@ void InformationForBuilderManager::update(const PlayerView &playerView) {
     for (int i = 0; i < playerView.entities.size(); i++) {
         const Entity &entity = playerView.entities[i];
         EntityType entityType = entity.entityType;
-        EntityProperties properties = playerView.entityProperties.at(entityType);
         if (!Utils::isMyEntity(entity)) continue;
         if (entity.entityType == BUILDER_UNIT) {
             builderPositions[entity.id] = entity.position;
         }
-        currentPopulation += properties.populationUse;
-        providedPopulation += properties.populationProvide;
+        currentPopulation += Utils::getEntityProperties(entityType).populationUse;
+        providedPopulation += Utils::getEntityProperties(entityType).populationProvide;
         if (entityType == BUILDER_BASE) numberOfBuilderBase++;
         if (entityType == RANGED_BASE) numberOfRangedBase++;
         if (entityType == MELEE_BASE) numberOfMeleeBase++;
@@ -100,8 +99,6 @@ void InformationForBuilderManager::update(const PlayerView &playerView) {
         }
     }
     bitmap.update(playerView);
-
-
     updateBuilders(playerView);
 }
 

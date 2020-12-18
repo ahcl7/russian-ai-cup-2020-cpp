@@ -3,7 +3,17 @@
 
 #include "DebugInterface.hpp"
 #include "model/Model.hpp"
-
+#include "Constances.hpp"
+#include "Utils.hpp"
+#include "Manager.hpp"
+#include <exception>
+#include <iostream>
+#include <map>
+#include <stdio.h>
+#include <time.h>
+#include <algorithm>
+#include <set>
+#include <bitset>
 class MyStrategy {
 public:
     MyStrategy();
