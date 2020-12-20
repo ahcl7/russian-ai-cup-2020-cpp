@@ -71,13 +71,13 @@ EntityAction BuilderManager::getAction(int entityId) {
     }
 
     if (currentTask.taskType == BUILD) {
-        if (Utils::isAdjacent(this->infoFBM.builderPositions[entityId], currentTask.targetPosition, Utils::getEntitySize(currentTask.targetEntityType))) {
+        if (this->infoFBM.builderPositions[entityId] == Vec2Int(currentTask.targetPosition.x - 1, currentTask.targetPosition.y)) {
             buildAction = shared_ptr<BuildAction>(
                     new BuildAction(currentTask.targetEntityType, currentTask.targetPosition));
         } else {
             int sz = Utils::getEntitySize(currentTask.targetEntityType);
-            Vec2Int centerPosition = Vec2Int(currentTask.targetPosition.x + sz / 2,
-                                             currentTask.targetPosition.y + sz / 2);
+            Vec2Int centerPosition = Vec2Int(currentTask.targetPosition.x - 1,
+                                             currentTask.targetPosition.y);
             moveAction = shared_ptr<MoveAction>(new MoveAction(centerPosition, true, true));
         }
     }

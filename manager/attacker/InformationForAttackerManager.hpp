@@ -6,13 +6,17 @@
 #define AICUP_CPP_INFORMATIONFORATTACKERMANAGER_HPP
 
 #include "../../model/Model.hpp"
+#include <vector>
+#include <map>
+using namespace std;
 
 
-class TargetPriority {
-    ATTACKER = 10,
-    TURRET = 6,
-    BUILDER = 4,
-    HOUSE_AND_BASE = 1
+
+enum TargetPriority {
+    TG_ATTACKER = 10,
+    TG_TURRET = 6,
+    TG_BUILDER = 4,
+    TG_HOUSE_AND_BASE = 1
 };
 
 class AttackerTaskType {
@@ -27,7 +31,7 @@ public:
 
 class InformationForAttackerManager {
 public:
-    InformationForAttackerManager();
+    InformationForAttackerManager() {};
     InformationForAttackerManager(const PlayerView& playerView);
     int curTick;
     vector<Entity> attackers;

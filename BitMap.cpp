@@ -54,7 +54,7 @@ void BitMap::update(const PlayerView &playerView) {
         EntityType entityType = entity.entityType;
         Vec2Int position = entity.position;
         int entitySize = Utils::getEntitySize(entityType);
-        if (!Utils::isMyEntity(entity)) {
+        if (Utils::isMyEntity(entity)) {
             int sightRange = Utils::getEntitySightRange(entityType);
             for (int j = -sightRange; j < sightRange + entitySize; j++) {
                 for (int k = -sightRange; k < sightRange + entitySize; k++) {

@@ -25,7 +25,6 @@ Action MyStrategy::getAction(const PlayerView &playerView, DebugInterface *debug
     }
     if (Utils::entityProperties.empty()) Utils::entityProperties = playerView.entityProperties;
 
-    cerr << "test utils " << Utils::getTopCoordinate().x <<" " << Utils::getTopCoordinate().y << endl;
     Utils::myId = playerView.myId;
     if (!isManagerInitialized) {
         manager = Manager(playerView);

@@ -6,7 +6,7 @@
 
 AttackerManager::AttackerManager(const PlayerView& playerView) {
     infoFAM = InformationForAttackerManager(playerView);
-    this.update(playerView);
+    this->update(playerView);
 }
 
 EntityAction AttackerManager::getAction(int entityId) {
@@ -14,5 +14,9 @@ EntityAction AttackerManager::getAction(int entityId) {
 }
 
 void AttackerManager::update(const PlayerView& playerView) {
+
+}
+
+void AttackerManager::createTask() {
 
 }
