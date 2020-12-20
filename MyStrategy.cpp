@@ -8,6 +8,12 @@ using namespace std;
 
 MyStrategy::MyStrategy() {}
 
+namespace Utils {
+    int mapSize = 0;
+    int myId = -1;
+    unordered_map<EntityType, EntityProperties> entityProperties;
+}
+
 Manager manager;
 
 bool isManagerInitialized = false;
@@ -18,9 +24,12 @@ Action MyStrategy::getAction(const PlayerView &playerView, DebugInterface *debug
         Utils::mapSize = playerView.mapSize;
     }
     if (Utils::entityProperties.empty()) Utils::entityProperties = playerView.entityProperties;
+
+    cerr << "test utils " << Utils::getTopCoordinate().x <<" " << Utils::getTopCoordinate().y << endl;
     Utils::myId = playerView.myId;
     if (!isManagerInitialized) {
         manager = Manager(playerView);
+        isManagerInitialized = true;
     } else manager.update(playerView);
 
     for (size_t i = 0; i < playerView.entities.size(); i++) {
@@ -37,6 +46,18 @@ Action MyStrategy::getAction(const PlayerView &playerView, DebugInterface *debug
             // melee, ranged, builder units
             if (entity.entityType == BUILDER_UNIT) {
                 entityAction = manager.getActionForBuilder(entity.id);
+                result.entityActions[entity.id] = entityAction;
+            }
+        } else {
+            if (entity.entityType == BUILDER_BASE) {
+                buildAction = std::shared_ptr<BuildAction>(new BuildAction(BUILDER_UNIT,
+                                                                           Vec2Int(entity.position.x + Utils::getEntitySize(entity.entityType),
+                                                                                   entity.position.y + Utils::getEntitySize(entity.entityType) - 1)));
+                entityAction = EntityAction(moveAction, buildAction, attackAction, repairAction);
+                result.entityActions[entity.id] = entityAction;
+            }
+        }
+    }
 //                if (repairer.count(entity.id)) {
 //                    int baseId = repairer[entity.id];
 //                    int baseSize = playerView.entityProperties.at(bases[baseId].entityType).size;
@@ -105,8 +126,8 @@ Action MyStrategy::getAction(const PlayerView &playerView, DebugInterface *debug
 //                                                                                   entity.position.y + properties.size -
 //                                                                                   1)));
 //                resource -= playerView.entityProperties.at(entityType).initialCost + count[entityType];
-            }
-        }
+//            }
+//        }
 //        std::vector<EntityType> validAutoAttackTargets;
 //        if (entity.entityType == BUILDER_UNIT && buildAction == nullptr && repairAction == nullptr) {
 //            validAutoAttackTargets.push_back(RESOURCE);
@@ -119,8 +140,7 @@ Action MyStrategy::getAction(const PlayerView &playerView, DebugInterface *debug
 //                        std::shared_ptr<AutoAttack>(new AutoAttack(properties.sightRange, validAutoAttackTargets)))),
 //                repairAction);
 
-        result.entityActions[entity.id] = entityAction;
-    }
+
     return result;
 }
 

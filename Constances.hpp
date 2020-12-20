@@ -19,7 +19,7 @@ const int BASE_CENTER = 10;
 
 const double RATE = 4;
 
-const int RESOURCE_RANGE = 5;
+const int RESOURCE_RANGE = 0;
 
 const int REPAIRER_INVOLVE_NUMBER = 3;
 

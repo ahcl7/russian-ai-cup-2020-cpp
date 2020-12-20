@@ -5,8 +5,8 @@
 #ifndef AICUP_CPP_MANAGER_HPP
 #define AICUP_CPP_MANAGER_HPP
 
-#include "BuilderManager.hpp"
-#include "AttackerManager.hpp"
+#include "builder/BuilderManager.hpp"
+#include "attacker/AttackerManager.hpp"
 
 class Manager {
 public:
@@ -16,6 +16,7 @@ public:
     Manager() {};
     Manager(const PlayerView& playerView1) {
         builderManager = BuilderManager(playerView1);
+        attackerManager = AttackerManager(playerView1);
     }
     EntityAction getActionForBuilder(int entityId) { return builderManager.getAction(entityId);};
     EntityAction getActionForAttacker(int entityId) { return attackerManager.getAction(entityId);};

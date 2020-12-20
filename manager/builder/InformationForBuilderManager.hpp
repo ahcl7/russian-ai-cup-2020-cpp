@@ -5,10 +5,11 @@
 #ifndef AICUP_CPP_INFORMATIONFORBUILDERMANAGER_HPP
 #define AICUP_CPP_INFORMATIONFORBUILDERMANAGER_HPP
 
-#include "model/Model.hpp"
-#include "BitMap.hpp"
+#include "../../model/Model.hpp"
+#include "../../BitMap.hpp"
 #include <vector>
 #include <map>
+#include <iostream>
 
 using namespace std;
 
@@ -50,11 +51,18 @@ public:
         priority = priority1;
         targetPosition = targetPosition1;
     }
+    friend ostream& operator<<(ostream& out, const BuilderTask& builderTask) {
+        out << (builderTask.taskType == BUILD ? "BUILD" : (builderTask.taskType == REPAIR ? "REPAIR" : "RESOURCE")) <<" " <<
+        builderTask.numberOfBuildersShouldBeInvolved << " "<< (builderTask.targetEntityType == HOUSE ? "HOUSE" : "BASE");
+        out << builderTask.targetPosition.x <<" " << builderTask.targetPosition.y;
+        return out;
+    }
 };
 
 class InformationForBuilderManager {
 public:
     int currentResource;
+    int numberOfAttackers;
     int currentPopulation;
     int providedPopulation;
     int curTick;
@@ -63,18 +71,23 @@ public:
     int numberOfMeleeBase;
     BitMap bitmap;
     map<int, Vec2Int> builderPositions;
-    vector <Vec2Int> basePositions;
     map<int, BuilderTask> doingTasks;
     vector<Entity> builders;
     vector<Entity> inactiveEntities;
     vector<Entity> resourcesEntities;
-    vector<BuilderTask> currentBuildingTasks;
     int getNumberOfBuilderRepairingFor(int entityId);
+    int getNumberOfHouseIsBuilding();
     InformationForBuilderManager() {};
     InformationForBuilderManager(const PlayerView &playerView);
     void update(const PlayerView &playerView);
     void updateBuilders(const PlayerView& playerView);
     bool isInactiveEntity(int entityId);
+    friend ostream& operator<<(ostream& os, const InformationForBuilderManager& info) {
+        os << "curTick " << info.curTick << endl;
+        os << "current population: " << info.currentPopulation <<endl;
+        os << "providedPopulation" << info.providedPopulation << endl;
+        return os;
+    }
 };
 
 #endif //AICUP_CPP_INFORMATIONFORBUILDERMANAGER_HPP

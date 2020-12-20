@@ -3,3 +3,6 @@
 !*.hpp
 !CMakeLists.txt
 !model
+!manager
+!manager/attacker
+!manager/builder

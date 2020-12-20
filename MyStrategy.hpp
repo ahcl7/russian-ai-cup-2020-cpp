@@ -5,7 +5,7 @@
 #include "model/Model.hpp"
 #include "Constances.hpp"
 #include "Utils.hpp"
-#include "Manager.hpp"
+#include "manager/Manager.hpp"
 #include <exception>
 #include <iostream>
 #include <map>
@@ -14,6 +14,9 @@
 #include <algorithm>
 #include <set>
 #include <bitset>
+#include <unordered_map>
+
+
 class MyStrategy {
 public:
     MyStrategy();

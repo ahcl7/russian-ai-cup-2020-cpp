@@ -7,18 +7,38 @@
 
 using namespace std;
 
+
+MCMF::MCMF() {
+    adj = vector<int> (MAX_E, 0);
+    cap = vector<int> (MAX_E, 0);
+    flw = vector<int> (MAX_E, 0);
+    cst = vector<int> (MAX_E, 0);
+    nxt = vector<int> (MAX_E, 0);
+    lst = vector<int> (MAX_E, 0);
+    frm = vector<int> (MAX_E, 0);
+    vis = vector<int> (MAX_E, 0);
+}
 void MCMF::init(int nn, int ss, int tt) {
+    cerr <<"init MCMF" << nn<<" " << ss <<" " << tt << endl;
     n = nn, s = ss, t = tt;
-    fill_n(lst, n, -1), E = 0;
+    E = 0;
+    for(int i = 0 ; i < lst.size(); i++) {
+        lst[i] = -1;
+    }
+    totalCost = 0;
+    totalFlow = 0;
 }
 
 void MCMF::add(int u, int v, int ca, int co) {
+    cerr << "mcmf: add" << u<<" " <<v <<" " << ca<<" " << co << endl;
     adj[E] = v, cap[E] = ca, flw[E] = 0, cst[E] = +co, nxt[E] = lst[u], lst[u] = E++;
     adj[E] = u, cap[E] = 0, flw[E] = 0, cst[E] = -co, nxt[E] = lst[v], lst[v] = E++;
 }
 
 int MCMF::spfa() {
-    fill_n(dst, n, coo), dst[s] = 0;
+    cerr << "OO" << OO<<endl;
+    dst = vector<int> (n, OO);
+    dst[s] = 0;
     queue<int> que;
     que.push(s);
     while (que.size()) {
@@ -38,14 +58,14 @@ int MCMF::spfa() {
             }
         vis[u] = 0;
     }
-    return dst[t] < coo;
+    return dst[t] < OO;
 }
 
 int MCMF::mincost() {
     totalCost = 0, totalFlow = 0;
     while (1) {
         if (!spfa()) break;
-        int mn = foo;
+        int mn = OO;
         for (int v = t, e = frm[v]; v != s; v = adj[e ^ 1], e = frm[v]) mn = min(mn, cap[e] - flw[e]);
         for (int v = t, e = frm[v]; v != s; v = adj[e ^ 1], e = frm[v]) {
             flw[e] += mn;
@@ -57,14 +77,19 @@ int MCMF::mincost() {
     return totalCost;
 }
 
-vector <pair<int, int>> MCMF::getPairs(int n, int m) {
+vector <pair<int, int>> MCMF::getPairs(int n1, int m1) {
+    cerr << "getPairs" << endl;
+    mincost();
+    cerr << "after running mincost" << endl;
     vector <pair<int, int>> res;
     for (int i = 0; i < E; i += 2) {
         int v = adj[i];
         int u = adj[i ^ 1];
-        if (u < n && (v >= n && v < n + m)) {
-            res.push_back(make_pair(u, v));
+        if (flw[i] && u < n1 && (v >= n1 && v < n1 + m1)) {
+            res.push_back(make_pair(u, v - n1));
         }
     }
+
+    cerr <<"Pairing size:" << res.size() << endl;
     return res;
 }

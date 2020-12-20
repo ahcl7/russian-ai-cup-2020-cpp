@@ -12,9 +12,9 @@
 using namespace std;
 
 namespace Utils {
-    static int mapSize = 0;
-    static int myId = -1;
-    static unordered_map<EntityType, EntityProperties> entityProperties;
+    extern int mapSize;
+    extern int myId;
+    extern unordered_map<EntityType, EntityProperties> entityProperties;
     int distance(Vec2Int a, Vec2Int b);
     int distance(Entity a, Entity b);
     int distance2(Vec2Int a, Vec2Int b);
