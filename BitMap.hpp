@@ -12,6 +12,7 @@
 #include <bitset>
 #include <set>
 #include <unordered_map>
+#include <assert.h>
 
 using namespace std;
 
@@ -26,7 +27,6 @@ class BitMap {
 public:
     int n;
     bool isFowEnable;
-    unordered_map <EntityType, EntityProperties> entityProperties;
     vector <bitset<MAX_SIZE>> bitmap;
     vector <vector<CellStatus>> bitmap_fow;
     vector <bitset<MAX_SIZE>> _bitmap;

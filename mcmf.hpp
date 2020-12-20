@@ -8,6 +8,8 @@
 #include <queue>
 #include <algorithm>
 #include <vector>
+#include <iostream>
+#include <string.h>
 
 using namespace std;
 
@@ -16,17 +18,14 @@ using namespace std;
 * 1. http://codeforces.com/contest/708/problem/D
 */
 
-#define MCMF MincostMaxflow
-const int foo = (int) 1e9;
-const int coo = (int) 1e9;
-namespace MincostMaxflow {
-    static const int maxv = 1e5 + 5;
-    static const int maxe = 1e6 + 5;
-    static int n, s, t, E;
-    static int adj[maxe], nxt[maxe], lst[maxv], frm[maxv], vis[maxv];
-    static int cap[maxe], flw[maxe], totalFlow;
-    static int cst[maxe], dst[maxv], totalCost;
-
+const int MAX_E = (int) 1e4;
+const int OO = (int) 1e4;
+class MCMF {
+public:
+    int n, s, t, E;
+    vector<int> adj, nxt, lst, frm, vis, cap, flw, cst, dst;
+    int totalCost, totalFlow;
+    MCMF();
     void init(int nn, int ss, int tt);
 
     void add(int u, int v, int ca, int co);
@@ -35,7 +34,7 @@ namespace MincostMaxflow {
 
     int mincost();
 
-    vector <pair<int, int>> getPairs(int n, int m);
-}
+    vector <pair<int, int>> getPairs(int n1, int m1);
+};
 
 #endif //AICUP_CPP_MCMF_HPP
