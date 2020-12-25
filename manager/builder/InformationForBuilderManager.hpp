@@ -6,7 +6,7 @@
 #define AICUP_CPP_INFORMATIONFORBUILDERMANAGER_HPP
 
 #include "../../model/Model.hpp"
-#include "../../BitMap.hpp"
+#include "../bitmap/BitMap.hpp"
 #include <vector>
 #include <map>
 #include <iostream>
@@ -69,6 +69,8 @@ public:
     int numberOfBuilderBase;
     int numberOfRangedBase;
     int numberOfMeleeBase;
+    int currentBuilderBuildingRangedBase;
+    bool needRangedBase;
     BitMap bitmap;
     map<int, Vec2Int> builderPositions;
     map<int, BuilderTask> doingTasks;

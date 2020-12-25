@@ -8,7 +8,7 @@
 #include "../../model/Model.hpp"
 #include "../../Constances.hpp"
 #include "InformationForBuilderManager.hpp"
-#include "../../BitMap.hpp"
+#include "../bitmap/BitMap.hpp"
 #include "../../Utils.hpp"
 #include "../../mcmf.hpp"
 #include <map>
@@ -30,6 +30,7 @@ public:
     void createAndAssignTasks();
     void update(const PlayerView& playerView);
     void implement(vector<Entity>& buildersCanBeInvolvedForTasks, vector<BuilderTask>& tasks, vector<pair<int,int>>& assignment);
+    Entity getClosetResource(Vec2Int position, vector <Entity> resourceEntities);
 };
 
 #endif //AICUP_CPP_BUILDERMANAGER_HPP

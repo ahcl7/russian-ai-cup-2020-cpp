@@ -83,3 +83,6 @@ int Utils::getEntitySightRange(EntityType entityType) {
 EntityProperties Utils::getEntityProperties(EntityType entityType) {
     return entityProperties.at(entityType);
 }
+int Utils::getEntityAttackRange(EntityType entityType) {
+    return entityProperties.at(entityType).attack == nullptr ? 0 : entityProperties.at(entityType).attack->attackRange;
+}

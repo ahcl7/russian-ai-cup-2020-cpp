@@ -13,11 +13,23 @@ BuilderManager::BuilderManager(const PlayerView& playerView) {
 
 }
 
-Entity getClosetResource(Vec2Int position, vector <Entity> resourceEntities) {
+Entity BuilderManager::getClosetResource(Vec2Int position, vector <Entity> resourceEntities) {
     int MinDis = INF;
     Entity res;
     for (auto &p:resourceEntities) {
-        if (Utils::distance(position, p.position) < MinDis) {
+        bool ok = false;
+        for(int i = -1 ; i < 2; i++) {
+            for(int j = -1 ; j < 2; j++) {
+                if (abs(i) + abs(j) == 1) {
+                    int x = p.position.x + i;
+                    int y = p.position.y + j;
+                    if (x < 0 || y < 0 || x >= Utils::mapSize - 1 || y >= Utils::mapSize - 1) continue;
+                    ok |= (this->infoFBM.bitmap.isFowEnable ? this->infoFBM.bitmap.bitmap_fow[x][y] == EMPTY
+                            : this->infoFBM.bitmap.bitmap[x].test(y) == 0);
+                }
+            }
+        }
+        if (ok && Utils::distance(position, p.position) < MinDis) {
             MinDis = Utils::distance(position, p.position);
             res = p;
         }
@@ -36,7 +48,6 @@ EntityAction BuilderManager::getAction(int entityId) {
     shared_ptr <BuildAction> buildAction = nullptr;
     shared_ptr <AttackAction> attackAction = nullptr;
     shared_ptr <RepairAction> repairAction = nullptr;
-    cerr <<"getAction " << entityId <<" " << (currentTask.taskType == COLLECT_RESOURCE ? "Resource" : "other") << endl;
     if (currentTask.taskType == COLLECT_RESOURCE) {
         // continue collect resource
 
@@ -48,7 +59,7 @@ EntityAction BuilderManager::getAction(int entityId) {
             Entity p = getClosetResource(this->infoFBM.builderPositions[entityId], this->infoFBM.resourcesEntities);
             if (Utils::distance(this->infoFBM.builderPositions[entityId], p.position) > RESOURCE_RANGE) {
                 moveAction = shared_ptr<MoveAction>(new MoveAction(p.position, true, true));
-                cerr <<"create Move Action " << p.position.x <<" " << p.position.y << endl;
+
             } else {
                 // TODO: make a move if builder is not moving
             }
@@ -56,6 +67,10 @@ EntityAction BuilderManager::getAction(int entityId) {
             //move around
             moveAction = shared_ptr<MoveAction>(new MoveAction(Utils::getResourceOptimalCoordinate(), true, true));
         }
+        vector<EntityType> targets;
+        targets.push_back(RESOURCE);
+        shared_ptr<AutoAttack> autoAttack = shared_ptr<AutoAttack>(new AutoAttack(10,targets));
+        attackAction = shared_ptr<AttackAction>(new AttackAction(nullptr, autoAttack));
     }
     if (currentTask.taskType == REPAIR) {
         EntityType entityType = currentTask.targetEntityType;
@@ -81,7 +96,6 @@ EntityAction BuilderManager::getAction(int entityId) {
             moveAction = shared_ptr<MoveAction>(new MoveAction(centerPosition, true, true));
         }
     }
-    cerr << "end get Action" << endl;
 
     return EntityAction(moveAction, buildAction, attackAction, repairAction);
 };
@@ -96,9 +110,9 @@ void BuilderManager::implement(vector<Entity>& buildersCanBeInvolvedForTasks,
         BuilderTask task = tasks[v];
         infoFBM.doingTasks[builderId] = task;
     }
-    for(auto& p: this->infoFBM.doingTasks) {
-        cerr << p.first <<" " << p.second << endl;
-    }
+//    for(auto& p: this->infoFBM.doingTasks) {
+//        cerr << p.first <<" " << p.second << endl;
+//    }
 }
 
 void BuilderManager::assignTasks(vector <BuilderTask>& tasks) {
@@ -124,11 +138,11 @@ void BuilderManager::assignTasks(vector <BuilderTask>& tasks) {
     }
     cerr <<"before get best positions" << endl;
     vector <Vec2Int> positions = infoFBM.bitmap.getBestPositions(basesBuildingTasks);
-    cerr << "found some good positions" << endl;
-    for(auto&p:positions) {
-        cerr << p.x <<" " << p.y << endl;
-    }
-    cerr <<"after get best positions" << endl;
+//    cerr << "found some good positions" << endl;
+//    for(auto&p:positions) {
+//        cerr << p.x <<" " << p.y << endl;
+//    }
+//    cerr <<"after get best positions" << endl;
     assert(positions.size() == basesBuildingTasks.size());
     int cur = 0;
     for (int i = 0; i < tasks.size(); i++) {
@@ -186,6 +200,7 @@ void BuilderManager::createAndAssignTasks() {
     int numberOfHouseCanBeBuilt = infoFBM.currentResource / Utils::getEntityCost(HOUSE);
     int expectedNumberOfHouse = numberOfHouseCanBeBuilt;
     expectedNumberOfHouse = min(expectedNumberOfHouse, min(3, max(0, 5 - remainProvidedPopulation / 5)));
+    if (this->infoFBM.needRangedBase) expectedNumberOfHouse = 0;
     //TODO: should count number of houses is building
     int numberOfHouseIsBuilding = infoFBM.getNumberOfHouseIsBuilding();
     expectedNumberOfHouse = max(0, expectedNumberOfHouse - numberOfHouseIsBuilding);
@@ -212,12 +227,16 @@ void BuilderManager::createAndAssignTasks() {
     for (int i = 0; i < expectedNumberOfHouse; i++) tasks.push_back(BuilderTask(BUILD, 1, AS_SOON_AS_POSSIBLE, -1, HOUSE));
     // TODO: need some logic here
     bool needBuilderBase = false;
-    bool needRangedBase = false;
+
+
+
+//    needRangedBase |= (this->infoFBM.currentResource > 4 * Utils::getEntityCost(RANGED_BASE)); // too much resource
+//    needRangedBase &= (this->infoFBM.numberOfRangedBase + this->infoFBM.currentBuilderBuildingRangedBase <= 3);
     bool needMeleeBase = false;
     if (needBuilderBase) {
         tasks.push_back(BuilderTask(BUILD, 1, IMMEDIATE, -1, BUILDER_BASE));
     }
-    if (needRangedBase) {
+    if (this->infoFBM.needRangedBase && this->infoFBM.currentResource >= Utils::getEntityCost(RANGED_BASE)) {
         tasks.push_back(BuilderTask(BUILD, 1, CAN_BE_DELAYED, -1, RANGED_BASE));
     }
     if (needMeleeBase) {

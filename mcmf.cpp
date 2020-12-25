@@ -19,7 +19,6 @@ MCMF::MCMF() {
     vis = vector<int> (MAX_E, 0);
 }
 void MCMF::init(int nn, int ss, int tt) {
-    cerr <<"init MCMF" << nn<<" " << ss <<" " << tt << endl;
     n = nn, s = ss, t = tt;
     E = 0;
     for(int i = 0 ; i < lst.size(); i++) {
@@ -30,13 +29,11 @@ void MCMF::init(int nn, int ss, int tt) {
 }
 
 void MCMF::add(int u, int v, int ca, int co) {
-    cerr << "mcmf: add" << u<<" " <<v <<" " << ca<<" " << co << endl;
     adj[E] = v, cap[E] = ca, flw[E] = 0, cst[E] = +co, nxt[E] = lst[u], lst[u] = E++;
     adj[E] = u, cap[E] = 0, flw[E] = 0, cst[E] = -co, nxt[E] = lst[v], lst[v] = E++;
 }
 
 int MCMF::spfa() {
-    cerr << "OO" << OO<<endl;
     dst = vector<int> (n, OO);
     dst[s] = 0;
     queue<int> que;

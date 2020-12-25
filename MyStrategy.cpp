@@ -46,13 +46,13 @@ Action MyStrategy::getAction(const PlayerView &playerView, DebugInterface *debug
             if (entity.entityType == BUILDER_UNIT) {
                 entityAction = manager.getActionForBuilder(entity.id);
                 result.entityActions[entity.id] = entityAction;
+            } else if (entity.entityType == RANGED_UNIT) {
+                entityAction = manager.getActionForAttacker(entity.id);
+                result.entityActions[entity.id] = entityAction;
             }
         } else {
-            if (entity.entityType == BUILDER_BASE) {
-                buildAction = std::shared_ptr<BuildAction>(new BuildAction(BUILDER_UNIT,
-                                                                           Vec2Int(entity.position.x + Utils::getEntitySize(entity.entityType),
-                                                                                   entity.position.y + Utils::getEntitySize(entity.entityType) - 1)));
-                entityAction = EntityAction(moveAction, buildAction, attackAction, repairAction);
+            if (entity.entityType == BUILDER_BASE || entity.entityType == RANGED_BASE) {
+                entityAction = manager.getActionForBase(entity);
                 result.entityActions[entity.id] = entityAction;
             }
         }
@@ -83,7 +83,7 @@ Action MyStrategy::getAction(const PlayerView &playerView, DebugInterface *debug
 //                            true));
 //                }
 
-            //TODO: remove comment
+    //TODO: remove comment
 //            } else {
 //                if (defenders.count(entity.id)) {
 //                    moveAction = std::shared_ptr<MoveAction>(new MoveAction(

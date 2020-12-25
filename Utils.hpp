@@ -33,6 +33,7 @@ namespace Utils {
     bool isInactiveEntity(Entity entity);
     int getEntityCost(EntityType entityType);
     int getEntitySightRange(EntityType entityType);
+    int getEntityAttackRange(EntityType entityType);
     EntityProperties getEntityProperties(EntityType entityType);
 };
 

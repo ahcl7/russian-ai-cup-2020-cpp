@@ -18,8 +18,8 @@ using namespace std;
 * 1. http://codeforces.com/contest/708/problem/D
 */
 
-const int MAX_E = (int) 1e4;
-const int OO = (int) 1e4;
+const int MAX_E = (int) 2e5;
+const int OO = (int) 1e5;
 class MCMF {
 public:
     int n, s, t, E;
