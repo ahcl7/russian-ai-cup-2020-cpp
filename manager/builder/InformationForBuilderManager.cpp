@@ -122,7 +122,9 @@ void InformationForBuilderManager::update(const PlayerView &playerView) {
             }
         }
     }
-    needRangedBase = (numberOfRangedBase + currentBuilderBuildingRangedBase == 0) && builderPositions.size() >= MIN_BUILDERS;
+//    needRangedBase = (numberOfRangedBase + currentBuilderBuildingRangedBase == 0) && builderPositions.size() >= MIN_BUILDERS;
+    needRangedBase = (numberOfRangedBase == 0) && builderPositions.size() >= MIN_BUILDERS;
+
     cerr << "update info Done!" << endl;
     cerr << *this << endl;
     updateBuilders(playerView);

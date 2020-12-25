@@ -23,7 +23,7 @@ public:
     }
     EntityAction getActionForBuilder(int entityId) { return builderManager.getAction(entityId);};
     EntityAction getActionForAttacker(int entityId) { return attackerManager.getAction(entityId);};
-    EntityAction getActionForBase(const Entity& entity) { return baseManager.getAction(entity, builderManager.infoFBM.needRangedBase);};
+    EntityAction getActionForBase(const Entity& entity) { return baseManager.getAction(entity, builderManager.infoFBM.needRangedBase, attackerManager.infoFAM.needAttackers);};
     void update(const PlayerView& playerView1) {
         this->playerView = playerView1;
         builderManager.update(playerView1);

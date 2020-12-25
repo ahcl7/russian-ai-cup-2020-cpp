@@ -29,7 +29,7 @@ const int MAXIMUM_NUMBER_DEFENDER = 15;
 
 const int MAX_NUM_BUILDER_UNIT = 50;
 
-const int MIN_BUILDERS = 10;
+const int MIN_BUILDERS = 15;
 
 const int MAX_SIZE = 100;
 

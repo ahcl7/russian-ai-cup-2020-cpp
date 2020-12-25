@@ -86,3 +86,15 @@ EntityProperties Utils::getEntityProperties(EntityType entityType) {
 int Utils::getEntityAttackRange(EntityType entityType) {
     return entityProperties.at(entityType).attack == nullptr ? 0 : entityProperties.at(entityType).attack->attackRange;
 }
+Vec2Int Utils::getMediumPoint(vector<Entity> entities) {
+    Vec2Int mediumPoint = Vec2Int(0,0);
+    for(auto& a:entities) {
+        mediumPoint.x += a.position.x;
+        mediumPoint.y += a.position.y;
+    }
+    if (entities.size() > 0) {
+        mediumPoint.x /= entities.size();
+        mediumPoint.y /= entities.size();
+    }
+    return mediumPoint;
+}

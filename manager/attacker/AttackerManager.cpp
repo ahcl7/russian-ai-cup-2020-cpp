@@ -60,35 +60,58 @@ Vec2Int getTargetForSecondGroup(set<LANES>& lanes) {
     }
 }
 
-bool AttackerManager::attack(vector<Entity>& attackers, Vec2Int targetPosition) {
+vector<Entity> AttackerManager::attack(vector<Entity>& attackers, Vec2Int targetPosition) { //return getback list
 //    if (attackers.size() < MINIMUM_NUMBER_OF_ATTACKER) return false;
+
+    // defend if under attack
+    vector<Entity> enemyAttackerAttackingMe;
+    for(auto &e: this->infoFAM.enemyAttackers) {
+        if (Utils::distance2(e.position, Utils::getBaseCoordinate()) <= Utils::sqr(Utils::mapSize / 2 - 10)) {
+            enemyAttackerAttackingMe.push_back(e);
+        }
+    }
+    vector<Entity> defendList;
+    vector<Entity> attackList;
+    Vec2Int P = Utils::getMediumPoint(enemyAttackerAttackingMe);
+    if (enemyAttackerAttackingMe.size() > 0) {
+        for(auto &a:attackers) {
+            if (Utils::distance2(a.position, P) < Utils::sqr(Utils::mapSize / 2)) {
+                defendList.push_back(a);
+            } else attackList.push_back(a);
+        }
+    } else attackList = attackers;
     vector<Entity> enemyAttackers = this->infoFAM.enemyAttackers;
-    int n = attackers.size();
+    int n = attackList.size();
     int m = enemyAttackers.size();
     int s = n + m;
     int t = s + 1;
     mcmf.init(t + 1, s, t);
     mcmf1.init(t + 1, s, t);
-    for(int i = 0 ; i < attackers.size(); i++) {
+    for(int i = 0 ; i < attackList.size(); i++) {
         for(int j = 0 ; j < this->infoFAM.enemyAttackers.size(); j++) {
-            if (Utils::distance(attackers[i].position, enemyAttackers[j].position) < Utils::getEntityAttackRange(attackers[i].entityType)) {
+            if (Utils::distance(attackList[i].position, enemyAttackers[j].position) < Utils::getEntityAttackRange(attackList[i].entityType)) {
                 mcmf.add(i, n + j, 1, 0);
             }
-            if (Utils::distance(attackers[i].position, enemyAttackers[j].position) < Utils::getEntityAttackRange(enemyAttackers[j].entityType)) {
+            if (Utils::distance(attackList[i].position, enemyAttackers[j].position) < Utils::getEntityAttackRange(enemyAttackers[j].entityType)) {
                 mcmf1.add(j, m + i, 1, 0);
             }
             mcmf.add(n + j, t, (enemyAttackers[j].health + 4) / 5, 0);
             mcmf1.add(s, j, 1, 0);
         }
         mcmf.add(s, i, 1, 0);
-        mcmf1.add(m + i, t, (attackers[i].health + 4 ) /  5, 0);
+        mcmf1.add(m + i, t, (attackList[i].health + 4 ) /  5, 0);
     }
     cerr <<"middle" << endl;
     vector<pair<int,int>> vt = mcmf.getPairs(n, m);
     vector<pair<int,int>> vt1 = mcmf1.getPairs(m, n);
-    for(auto &a: attackers) {
+    for(auto &a: attackList) {
         this->infoFAM.doingTasks[a.id] = AttackerTask(RUN, -1, targetPosition);
     }
+    for(auto &d: defendList) {
+        this->infoFAM.doingTasks[d.id] = AttackerTask(RUN, -1, P); // move defender to medium point
+    }
+
+    vector<Entity> getBackList;
     if (vt.size() >= vt1.size()) {
         //attack
         for(auto& p: vt) {
@@ -96,33 +119,28 @@ bool AttackerManager::attack(vector<Entity>& attackers, Vec2Int targetPosition) 
             int v = p.second;
             this->infoFAM.doingTasks[attackers[u].id] = AttackerTask(ATTACK, enemyAttackers[v].id);
         }
+    } else {
+        getBackList = attackList;
     }
-    cerr << "endl" << endl;
-    return vt.size() >= vt1.size();
+    return getBackList;
 }
 
-bool AttackerManager::getBack(vector<Entity>& attackers) {
+bool AttackerManager::getBack(vector<Entity> attackers) {
     //TODO: improve this strategy
-    Vec2Int mediumPoint = Vec2Int(0,0);
     for(auto& a:attackers) {
-        Vec2Int newPosition = a.position;
-        if (newPosition.x <= newPosition.y) {
-            newPosition.y --;
-        } else newPosition.x --;
-        this->infoFAM.doingTasks[a.id] = AttackerTask(RUN, -1, newPosition);
+        bool isUnderAttack = false;
+        for(auto& e:this->infoFAM.enemyAttackers) {
+            if (Utils::distance(a.position, e.position) <= Utils::getEntityAttackRange(e.entityType) + 1) {
+                isUnderAttack = true;
+            }
+        }
+        if (isUnderAttack) {
+            Vec2Int newPosition = a.position;
+            if (newPosition.x >= newPosition.y) newPosition.x--;
+            else newPosition.y --;
+            this->infoFAM.doingTasks[a.id] = AttackerTask(RUN, -1, newPosition);
+        }
     }
-    for(auto& a:attackers) {
-        mediumPoint.x += a.position.x;
-        mediumPoint.y += a.position.y;
-    }
-    if (attackers.size() > 0) {
-        mediumPoint.x /= attackers.size();
-        mediumPoint.y /= attackers.size();
-    }
-    for(auto& a:attackers) {
-        this->infoFAM.doingTasks[a.id] = AttackerTask(RUN, -1, mediumPoint);
-    }
-    cerr << "endl1" << endl;
     return false;
 }
 
@@ -154,10 +172,8 @@ void AttackerManager::createTask() {
         cerr << "position " << getTargetForFirstGroup(this->infoFAM.remainPlayers).x <<" " << getTargetForFirstGroup(this->infoFAM.remainPlayers).y<< endl;
         cerr << "position " << getTargetForSecondGroup(this->infoFAM.remainPlayers).x <<" " << getTargetForSecondGroup(this->infoFAM.remainPlayers).y<< endl;
 
-        this->attack(this->infoFAM.firstAttackerGroup, getTargetForFirstGroup(this->infoFAM.remainPlayers))
-            || this->getBack(this->infoFAM.firstAttackerGroup);
-        this->attack(this->infoFAM.secondAttackerGroup, getTargetForSecondGroup(this->infoFAM.remainPlayers))
-            || this->getBack(this->infoFAM.secondAttackerGroup);
+        this->getBack(this->attack(this->infoFAM.firstAttackerGroup, getTargetForFirstGroup(this->infoFAM.remainPlayers)));
+        this->getBack(this->attack(this->infoFAM.secondAttackerGroup, getTargetForSecondGroup(this->infoFAM.remainPlayers)));
 //    } es
 
 }

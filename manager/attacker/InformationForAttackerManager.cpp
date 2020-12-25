@@ -44,6 +44,8 @@ void InformationForAttackerManager::update(const PlayerView &playerView) {
     enemyAttackers.clear();
     enemyBuilders.clear();
     enemyHouseAndBases.clear();
+    numberOfBuilders = 0;
+    numberOfRangedBase = 0;
     for(int i = 0 ; i < playerView.entities.size(); i++) {
         const Entity&  entity = playerView.entities[i];
         EntityType entityType = entity.entityType;
@@ -52,6 +54,12 @@ void InformationForAttackerManager::update(const PlayerView &playerView) {
             if (entityType == RANGED_UNIT || entityType == MELEE_UNIT) {
                 newAttackers.push_back(entity);
                 newAttackerIds.insert(entity.id);
+            }
+            if (entityType == BUILDER_UNIT) {
+                numberOfBuilders++;
+            }
+            if (entityType == RANGED_BASE) {
+                numberOfRangedBase++;
             }
         }
         if (!Utils::isMyEntity(entity)) {
@@ -89,6 +97,8 @@ void InformationForAttackerManager::update(const PlayerView &playerView) {
     firstAttackerGroup = newFirstAttackerGroup;
     secondAttackerGroup = newSecondAttackerGroup;
     attackerIds = newAttackerIds;
+
+    needAttackers = numberOfRangedBase > 0 && attackers.size() < MINIMUM_NUMBER_OF_ATTACKER && numberOfBuilders >= 10;
     //_TODO: update remain players
     if (remainPlayers.count(TOP) && isDead(TOP)) remainPlayers.erase(TOP);
     if (remainPlayers.count(BOT) && isDead(BOT)) remainPlayers.erase(BOT);

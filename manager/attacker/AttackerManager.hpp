@@ -24,7 +24,7 @@ public:
     EntityAction getAction(int entityId);
     void update(const PlayerView& playerView);
     void createTask();
-    bool attack(vector<Entity>& attackers, Vec2Int targetPosition);
-    bool getBack(vector<Entity>& attackers);
+    vector<Entity> attack(vector<Entity>& attackers, Vec2Int targetPosition);
+    bool getBack(vector<Entity> attackers);
 };
 #endif //AICUP_CPP_ATTACKERMANAGER_HPP

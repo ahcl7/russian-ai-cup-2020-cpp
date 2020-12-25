@@ -236,7 +236,8 @@ void BuilderManager::createAndAssignTasks() {
     if (needBuilderBase) {
         tasks.push_back(BuilderTask(BUILD, 1, IMMEDIATE, -1, BUILDER_BASE));
     }
-    if (this->infoFBM.needRangedBase && this->infoFBM.currentResource >= Utils::getEntityCost(RANGED_BASE)) {
+    if (this->infoFBM.needRangedBase && this->infoFBM.currentResource >= Utils::getEntityCost(RANGED_BASE) &&
+        this->infoFBM.currentBuilderBuildingRangedBase == 0) {
         tasks.push_back(BuilderTask(BUILD, 1, CAN_BE_DELAYED, -1, RANGED_BASE));
     }
     if (needMeleeBase) {

@@ -51,6 +51,9 @@ public:
     bool started;
     int curTick;
     int numberOfPlayers;
+    bool needAttackers;
+    int numberOfBuilders;
+    int numberOfRangedBase;
     vector<Entity> attackers;
     set<int> attackerIds;
     map<int, Vec2Int> attackersPositions;
