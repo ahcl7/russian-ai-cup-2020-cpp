@@ -4,7 +4,7 @@
 
 #include "AttackerManager.hpp"
 
-AttackerManager::AttackerManager(const PlayerView& playerView) {
+AttackerManager::AttackerManager(const PlayerView &playerView) {
     infoFAM = InformationForAttackerManager(playerView);
     mcmf = MCMF();
     mcmf1 = MCMF();
@@ -13,32 +13,34 @@ AttackerManager::AttackerManager(const PlayerView& playerView) {
 
 EntityAction AttackerManager::getAction(int entityId) {
     AttackerTask currentTask = this->infoFAM.doingTasks[entityId];
-    shared_ptr <MoveAction> moveAction = nullptr;
-    shared_ptr <BuildAction> buildAction = nullptr;
-    shared_ptr <AttackAction> attackAction = nullptr;
-    shared_ptr <RepairAction> repairAction = nullptr;
+    shared_ptr<MoveAction> moveAction = nullptr;
+    shared_ptr<BuildAction> buildAction = nullptr;
+    shared_ptr<AttackAction> attackAction = nullptr;
+    shared_ptr<RepairAction> repairAction = nullptr;
 
     if (currentTask.attackerTaskType == ATTACK) {
         shared_ptr<int> target = shared_ptr<int>(new int(currentTask.targetId));
         std::vector<EntityType> validAutoAttackTargets;
         shared_ptr<AutoAttack> autoAttack = std::shared_ptr<AutoAttack>(new AutoAttack(10, validAutoAttackTargets));
         attackAction = shared_ptr<AttackAction>(new AttackAction(target, autoAttack));
-    } else {
+    } else if (currentTask.attackerTaskType == MOVE){
         moveAction = shared_ptr<MoveAction>(new MoveAction(currentTask.targetPosition, true, true));
         shared_ptr<int> target = nullptr;
         std::vector<EntityType> validAutoAttackTargets;
         shared_ptr<AutoAttack> autoAttack = std::shared_ptr<AutoAttack>(new AutoAttack(10, validAutoAttackTargets));
         attackAction = shared_ptr<AttackAction>(new AttackAction(target, autoAttack));
+    } else {
+        moveAction = shared_ptr<MoveAction>(new MoveAction(currentTask.targetPosition, true, true));
     }
     return EntityAction(moveAction, buildAction, attackAction, repairAction);
 }
 
-void AttackerManager::update(const PlayerView& playerView) {
+void AttackerManager::update(const PlayerView &playerView) {
     this->infoFAM.update(playerView);
     this->createTask();
 }
 
-Vec2Int getTargetForFirstGroup(set<LANES>& lanes) {
+Vec2Int getTargetForFirstGroup(set<LANES> &lanes) {
     //TODO: using infoFAM.isDead is cleaner
     if (lanes.count(BOT)) {
         return Utils::getBotCoordinate();
@@ -49,7 +51,7 @@ Vec2Int getTargetForFirstGroup(set<LANES>& lanes) {
     }
 }
 
-Vec2Int getTargetForSecondGroup(set<LANES>& lanes) {
+Vec2Int getTargetForSecondGroup(set<LANES> &lanes) {
     //TODO: using infoFAM.isDead is cleaner
     if (lanes.count(TOP)) {
         return Utils::getTopCoordinate();
@@ -60,12 +62,12 @@ Vec2Int getTargetForSecondGroup(set<LANES>& lanes) {
     }
 }
 
-vector<Entity> AttackerManager::attack(vector<Entity>& attackers, Vec2Int targetPosition) { //return getback list
+vector<Entity> AttackerManager::attack(vector<Entity> &attackers, Vec2Int targetPosition) { //return getback list
 //    if (attackers.size() < MINIMUM_NUMBER_OF_ATTACKER) return false;
 
     // defend if under attack
     vector<Entity> enemyAttackerAttackingMe;
-    for(auto &e: this->infoFAM.enemyAttackers) {
+    for (auto &e: this->infoFAM.enemyAttackers) {
         if (Utils::distance2(e.position, Utils::getBaseCoordinate()) <= Utils::sqr(Utils::mapSize / 2 - 10)) {
             enemyAttackerAttackingMe.push_back(e);
         }
@@ -74,47 +76,50 @@ vector<Entity> AttackerManager::attack(vector<Entity>& attackers, Vec2Int target
     vector<Entity> attackList;
     Vec2Int P = Utils::getMediumPoint(enemyAttackerAttackingMe);
     if (enemyAttackerAttackingMe.size() > 0) {
-        for(auto &a:attackers) {
+        for (auto &a:attackers) {
             if (Utils::distance2(a.position, P) < Utils::sqr(Utils::mapSize / 2)) {
                 defendList.push_back(a);
             } else attackList.push_back(a);
         }
     } else attackList = attackers;
+    cerr << " tqll " << attackList.size() << " " << defendList.size() << endl;
     vector<Entity> enemyAttackers = this->infoFAM.enemyAttackers;
     int n = attackList.size();
     int m = enemyAttackers.size();
+    cerr << "ll " << n << " " << m << endl;
     int s = n + m;
     int t = s + 1;
     mcmf.init(t + 1, s, t);
     mcmf1.init(t + 1, s, t);
-    for(int i = 0 ; i < attackList.size(); i++) {
-        for(int j = 0 ; j < this->infoFAM.enemyAttackers.size(); j++) {
-            if (Utils::distance(attackList[i].position, enemyAttackers[j].position) < Utils::getEntityAttackRange(attackList[i].entityType)) {
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            if (Utils::distance(attackList[i], enemyAttackers[j]) <=
+                Utils::getEntityAttackRange(attackList[i].entityType)) {
                 mcmf.add(i, n + j, 1, 0);
             }
-            if (Utils::distance(attackList[i].position, enemyAttackers[j].position) < Utils::getEntityAttackRange(enemyAttackers[j].entityType)) {
+            if (Utils::distance(attackList[i], enemyAttackers[j]) <=
+                Utils::getEntityAttackRange(enemyAttackers[j].entityType)) {
                 mcmf1.add(j, m + i, 1, 0);
             }
-            mcmf.add(n + j, t, (enemyAttackers[j].health + 4) / 5, 0);
+            mcmf.add(n + j, t, (enemyAttackers[j].health + 4) / 5, (enemyAttackers[j].health + 4) / 5);
             mcmf1.add(s, j, 1, 0);
         }
         mcmf.add(s, i, 1, 0);
-        mcmf1.add(m + i, t, (attackList[i].health + 4 ) /  5, 0);
+        mcmf1.add(m + i, t, (attackList[i].health + 4) / 5, (attackList[i].health + 4) / 5);
     }
-    cerr <<"middle" << endl;
-    vector<pair<int,int>> vt = mcmf.getPairs(n, m);
-    vector<pair<int,int>> vt1 = mcmf1.getPairs(m, n);
-    for(auto &a: attackList) {
-        this->infoFAM.doingTasks[a.id] = AttackerTask(RUN, -1, targetPosition);
+    vector<pair<int, int>> vt = mcmf.getPairs(n, m);
+    vector<pair<int, int>> vt1 = mcmf1.getPairs(m, n);
+    for (auto &a: attackList) {
+        this->infoFAM.doingTasks[a.id] = AttackerTask(MOVE, -1, targetPosition);
     }
-    for(auto &d: defendList) {
-        this->infoFAM.doingTasks[d.id] = AttackerTask(RUN, -1, P); // move defender to medium point
+    for (auto &d: defendList) {
+        this->infoFAM.doingTasks[d.id] = AttackerTask(MOVE, -1, P); // move defender to medium point
     }
 
     vector<Entity> getBackList;
     if (vt.size() >= vt1.size()) {
         //attack
-        for(auto& p: vt) {
+        for (auto &p: vt) {
             int u = p.first;
             int v = p.second;
             this->infoFAM.doingTasks[attackers[u].id] = AttackerTask(ATTACK, enemyAttackers[v].id);
@@ -127,18 +132,19 @@ vector<Entity> AttackerManager::attack(vector<Entity>& attackers, Vec2Int target
 
 bool AttackerManager::getBack(vector<Entity> attackers) {
     //TODO: improve this strategy
-    for(auto& a:attackers) {
+    Vec2Int P = Utils::getMediumPoint(attackers);
+    for (auto &a:attackers) {
         bool isUnderAttack = false;
-        for(auto& e:this->infoFAM.enemyAttackers) {
-            if (Utils::distance(a.position, e.position) <= Utils::getEntityAttackRange(e.entityType) + 1) {
+        for (auto &e:this->infoFAM.enemyAttackers) {
+            if (Utils::distance(a.position, e.position) <= Utils::getEntityAttackRange(e.entityType)) {
                 isUnderAttack = true;
             }
         }
         if (isUnderAttack) {
-            Vec2Int newPosition = a.position;
-            if (newPosition.x >= newPosition.y) newPosition.x--;
-            else newPosition.y --;
-            this->infoFAM.doingTasks[a.id] = AttackerTask(RUN, -1, newPosition);
+//            Vec2Int newPosition = a.position;
+//            if (newPosition.x >= newPosition.y) newPosition.x--;
+//            else newPosition.y--;
+            this->infoFAM.doingTasks[a.id] = AttackerTask(RUN, -1, P);
         }
     }
     return false;
@@ -164,16 +170,19 @@ void AttackerManager::createTask() {
     // attack
     // defend
 //    if (this->infoFAM.started) {
-        //find target
-        //move units to target base
-        //assign for attacker that in enemy range first
-        //TODO: merge two groups if only one target remain
-        cerr << "force info " << this->infoFAM.firstAttackerGroup.size() <<" " << this->infoFAM.secondAttackerGroup.size() << endl;
-        cerr << "position " << getTargetForFirstGroup(this->infoFAM.remainPlayers).x <<" " << getTargetForFirstGroup(this->infoFAM.remainPlayers).y<< endl;
-        cerr << "position " << getTargetForSecondGroup(this->infoFAM.remainPlayers).x <<" " << getTargetForSecondGroup(this->infoFAM.remainPlayers).y<< endl;
+    //find target
+    //move units to target base
+    //assign for attacker that in enemy range first
+    //TODO: merge two groups if only one target remain
+    cerr << "force info " << this->infoFAM.firstAttackerGroup.size() << " " << this->infoFAM.secondAttackerGroup.size()
+         << endl;
+    cerr << "position " << getTargetForFirstGroup(this->infoFAM.remainPlayers).x << " "
+         << getTargetForFirstGroup(this->infoFAM.remainPlayers).y << endl;
+    cerr << "position " << getTargetForSecondGroup(this->infoFAM.remainPlayers).x << " "
+         << getTargetForSecondGroup(this->infoFAM.remainPlayers).y << endl;
 
-        this->getBack(this->attack(this->infoFAM.firstAttackerGroup, getTargetForFirstGroup(this->infoFAM.remainPlayers)));
-        this->getBack(this->attack(this->infoFAM.secondAttackerGroup, getTargetForSecondGroup(this->infoFAM.remainPlayers)));
+    this->getBack(this->attack(this->infoFAM.firstAttackerGroup, getTargetForFirstGroup(this->infoFAM.remainPlayers)));
+    this->getBack(this->attack(this->infoFAM.secondAttackerGroup, getTargetForFirstGroup(this->infoFAM.remainPlayers)));
 //    } es
 
 }

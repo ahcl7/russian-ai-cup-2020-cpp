@@ -8,7 +8,6 @@
 BuilderManager::BuilderManager(const PlayerView& playerView) {
     infoFBM = InformationForBuilderManager(playerView);
     this->mcmf = MCMF();
-    cerr << "init inforFBM done" << endl;
     this->update(playerView);
 
 }

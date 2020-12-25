@@ -40,7 +40,7 @@ void InformationForAttackerManager::update(const PlayerView &playerView) {
     curTick = playerView.currentTick;
     numberOfPlayers = playerView.players.size();
     vector<Entity> newAttackers;
-    set<int> newAttackerIds;
+    map <int, Entity> newAttackerMap;
     enemyAttackers.clear();
     enemyBuilders.clear();
     enemyHouseAndBases.clear();
@@ -53,7 +53,7 @@ void InformationForAttackerManager::update(const PlayerView &playerView) {
             //TODO: may be accept only ranged unit
             if (entityType == RANGED_UNIT || entityType == MELEE_UNIT) {
                 newAttackers.push_back(entity);
-                newAttackerIds.insert(entity.id);
+                newAttackerMap[entity.id] = entity;
             }
             if (entityType == BUILDER_UNIT) {
                 numberOfBuilders++;
@@ -76,18 +76,18 @@ void InformationForAttackerManager::update(const PlayerView &playerView) {
     }
     vector<Entity> newFirstAttackerGroup;
     for(auto&p: firstAttackerGroup) {
-        if (newAttackerIds.count(p.id)) {
-            newFirstAttackerGroup.push_back(p); //keep alive attackers
+        if (newAttackerMap.count(p.id)) {
+            newFirstAttackerGroup.push_back(newAttackerMap[p.id]); //keep alive attackers
         }
     }
     vector<Entity> newSecondAttackerGroup;
     for(auto&p: secondAttackerGroup) {
-        if (newAttackerIds.count(p.id)) {
-            newSecondAttackerGroup.push_back(p); //keep alive attackers
+        if (newAttackerMap.count(p.id)) {
+            newSecondAttackerGroup.push_back(newAttackerMap[p.id]); //keep alive attackers
         }
     }
     for(auto& p:newAttackers) {
-        if (!attackerIds.count(p.id)) { // new attacker
+        if (!attackerMap.count(p.id)) { // new attacker
             if (newFirstAttackerGroup.size() <= newSecondAttackerGroup.size()) {
                 newFirstAttackerGroup.push_back(p);
             } else newSecondAttackerGroup.push_back(p);
@@ -96,9 +96,9 @@ void InformationForAttackerManager::update(const PlayerView &playerView) {
     attackers = newAttackers;
     firstAttackerGroup = newFirstAttackerGroup;
     secondAttackerGroup = newSecondAttackerGroup;
-    attackerIds = newAttackerIds;
+    attackerMap = newAttackerMap;
 
-    needAttackers = numberOfRangedBase > 0 && attackers.size() < MINIMUM_NUMBER_OF_ATTACKER && numberOfBuilders >= 10;
+    needAttackers = numberOfRangedBase > 0 && attackers.size() < MINIMUM_NUMBER_OF_ATTACKER && numberOfBuilders >= 8;
     //_TODO: update remain players
     if (remainPlayers.count(TOP) && isDead(TOP)) remainPlayers.erase(TOP);
     if (remainPlayers.count(BOT) && isDead(BOT)) remainPlayers.erase(BOT);

@@ -27,7 +27,7 @@ const int POPULATION_BACKUP_QUANTITY = 5;
 
 const int MAXIMUM_NUMBER_DEFENDER = 15;
 
-const int MAX_NUM_BUILDER_UNIT = 50;
+const int MAX_NUM_BUILDER_UNIT = 69;
 
 const int MIN_BUILDERS = 15;
 

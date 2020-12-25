@@ -24,6 +24,7 @@ void MCMF::init(int nn, int ss, int tt) {
     for(int i = 0 ; i < lst.size(); i++) {
         lst[i] = -1;
     }
+    fill(vis.begin(), vis.end(), 0);
     totalCost = 0;
     totalFlow = 0;
 }
@@ -75,9 +76,7 @@ int MCMF::mincost() {
 }
 
 vector <pair<int, int>> MCMF::getPairs(int n1, int m1) {
-    cerr << "getPairs" << endl;
     mincost();
-    cerr << "after running mincost" << endl;
     vector <pair<int, int>> res;
     for (int i = 0; i < E; i += 2) {
         int v = adj[i];

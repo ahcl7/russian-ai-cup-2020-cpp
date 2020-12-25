@@ -12,6 +12,7 @@
 #include "InformationForAttackerManager.hpp"
 #include "../../mcmf.hpp"
 #include "../../Constances.hpp"
+#include <assert.h>
 
 using namespace std;
 class AttackerManager {

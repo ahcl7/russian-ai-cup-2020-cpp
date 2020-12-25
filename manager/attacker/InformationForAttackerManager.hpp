@@ -28,7 +28,8 @@ enum LANES {
 };
 enum AttackerTaskType {
     ATTACK = 1,
-    RUN = 2
+    MOVE = 2,
+    RUN = 3
 };
 
 class AttackerTask {
@@ -56,6 +57,7 @@ public:
     int numberOfRangedBase;
     vector<Entity> attackers;
     set<int> attackerIds;
+    map<int, Entity> attackerMap;
     map<int, Vec2Int> attackersPositions;
     map<int, AttackerTask> doingTasks;
     vector<Entity> firstAttackerGroup;
