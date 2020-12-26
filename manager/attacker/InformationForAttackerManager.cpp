@@ -46,6 +46,7 @@ void InformationForAttackerManager::update(const PlayerView &playerView) {
     enemyHouseAndBases.clear();
     numberOfBuilders = 0;
     numberOfRangedBase = 0;
+    bool isRangedBaseActive = false;
     for(int i = 0 ; i < playerView.entities.size(); i++) {
         const Entity&  entity = playerView.entities[i];
         EntityType entityType = entity.entityType;
@@ -60,6 +61,9 @@ void InformationForAttackerManager::update(const PlayerView &playerView) {
             }
             if (entityType == RANGED_BASE) {
                 numberOfRangedBase++;
+                if (!Utils::isInactiveEntity(entity)) {
+                    isRangedBaseActive = true;
+                }
             }
         }
         if (!Utils::isMyEntity(entity)) {
@@ -98,7 +102,8 @@ void InformationForAttackerManager::update(const PlayerView &playerView) {
     secondAttackerGroup = newSecondAttackerGroup;
     attackerMap = newAttackerMap;
 
-    needAttackers = numberOfRangedBase > 0 && attackers.size() < MINIMUM_NUMBER_OF_ATTACKER && numberOfBuilders >= 8;
+    needAttackers = numberOfRangedBase > 0 && isRangedBaseActive && attackers.size() < MINIMUM_NUMBER_OF_ATTACKER && numberOfBuilders >= 8;
+
     //_TODO: update remain players
     if (remainPlayers.count(TOP) && isDead(TOP)) remainPlayers.erase(TOP);
     if (remainPlayers.count(BOT) && isDead(BOT)) remainPlayers.erase(BOT);
