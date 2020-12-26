@@ -110,7 +110,7 @@ void InformationForBuilderManager::update(const PlayerView &playerView) {
             resourcesEntities.push_back(entity);
         }
     }
-    cerr << "before update bitmap" << endl;
+//    cerr << "before update bitmap" << endl;
     bitmap.update(playerView);
     // cover all in building bases/houses
     for(auto& p: doingTasks) {
@@ -125,7 +125,6 @@ void InformationForBuilderManager::update(const PlayerView &playerView) {
 //    needRangedBase = (numberOfRangedBase + currentBuilderBuildingRangedBase == 0) && builderPositions.size() >= MIN_BUILDERS;
     needRangedBase = (numberOfRangedBase == 0) && builderPositions.size() >= MIN_BUILDERS;
 
-    cerr << "update info Done!" << endl;
     cerr << *this << endl;
     updateBuilders(playerView);
 }

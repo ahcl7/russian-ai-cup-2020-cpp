@@ -82,33 +82,33 @@ vector<Entity> AttackerManager::attack(vector<Entity> &attackers, Vec2Int target
             } else attackList.push_back(a);
         }
     } else attackList = attackers;
-    cerr << " tqll " << attackList.size() << " " << defendList.size() << endl;
+//    cerr << " tqll " << attackList.size() << " " << defendList.size() << endl;
     vector<Entity> enemyAttackers = this->infoFAM.enemyAttackers;
     int n = attackList.size();
     int m = enemyAttackers.size();
-    cerr << "ll " << n << " " << m << endl;
+//    cerr << "ll " << n << " " << m << endl;
     int s = n + m;
     int t = s + 1;
     mcmf.init(t + 1, s, t);
-    mcmf1.init(t + 1, s, t);
+//    mcmf1.init(t + 1, s, t);
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < m; j++) {
             if (Utils::distance(attackList[i], enemyAttackers[j]) <=
                 Utils::getEntityAttackRange(attackList[i].entityType)) {
                 mcmf.add(i, n + j, 1, 0);
             }
-            if (Utils::distance(attackList[i], enemyAttackers[j]) <=
-                Utils::getEntityAttackRange(enemyAttackers[j].entityType)) {
-                mcmf1.add(j, m + i, 1, 0);
-            }
+//            if (Utils::distance(attackList[i], enemyAttackers[j]) <=
+//                Utils::getEntityAttackRange(enemyAttackers[j].entityType)) {
+//                mcmf1.add(j, m + i, 1, 0);
+//            }
             mcmf.add(n + j, t, (enemyAttackers[j].health + 4) / 5, (enemyAttackers[j].health + 4) / 5);
-            mcmf1.add(s, j, 1, 0);
+//            mcmf1.add(s, j, 1, 0);
         }
         mcmf.add(s, i, 1, 0);
-        mcmf1.add(m + i, t, (attackList[i].health + 4) / 5, (attackList[i].health + 4) / 5);
+//        mcmf1.add(m + i, t, (attackList[i].health + 4) / 5, (attackList[i].health + 4) / 5);
     }
     vector<pair<int, int>> vt = mcmf.getPairs(n, m);
-    vector<pair<int, int>> vt1 = mcmf1.getPairs(m, n);
+//    vector<pair<int, int>> vt1 = mcmf1.getPairs(m, n);
     for (auto &a: attackList) {
         this->infoFAM.doingTasks[a.id] = AttackerTask(MOVE, -1, targetPosition);
     }
@@ -117,16 +117,16 @@ vector<Entity> AttackerManager::attack(vector<Entity> &attackers, Vec2Int target
     }
 
     vector<Entity> getBackList;
-    if (vt.size() >= vt1.size()) {
+//    if (vt.size() >= vt1.size()) {
         //attack
         for (auto &p: vt) {
             int u = p.first;
             int v = p.second;
             this->infoFAM.doingTasks[attackers[u].id] = AttackerTask(ATTACK, enemyAttackers[v].id);
         }
-    } else {
-        getBackList = attackList;
-    }
+//    } else {
+//        getBackList = attackList;
+//    }
     return getBackList;
 }
 
@@ -174,12 +174,12 @@ void AttackerManager::createTask() {
     //move units to target base
     //assign for attacker that in enemy range first
     //TODO: merge two groups if only one target remain
-    cerr << "force info " << this->infoFAM.firstAttackerGroup.size() << " " << this->infoFAM.secondAttackerGroup.size()
-         << endl;
-    cerr << "position " << getTargetForFirstGroup(this->infoFAM.remainPlayers).x << " "
-         << getTargetForFirstGroup(this->infoFAM.remainPlayers).y << endl;
-    cerr << "position " << getTargetForSecondGroup(this->infoFAM.remainPlayers).x << " "
-         << getTargetForSecondGroup(this->infoFAM.remainPlayers).y << endl;
+//    cerr << "force info " << this->infoFAM.firstAttackerGroup.size() << " " << this->infoFAM.secondAttackerGroup.size()
+//         << endl;
+//    cerr << "position " << getTargetForFirstGroup(this->infoFAM.remainPlayers).x << " "
+//         << getTargetForFirstGroup(this->infoFAM.remainPlayers).y << endl;
+//    cerr << "position " << getTargetForSecondGroup(this->infoFAM.remainPlayers).x << " "
+//         << getTargetForSecondGroup(this->infoFAM.remainPlayers).y << endl;
 
     this->getBack(this->attack(this->infoFAM.firstAttackerGroup, getTargetForFirstGroup(this->infoFAM.remainPlayers)));
     this->getBack(this->attack(this->infoFAM.secondAttackerGroup, getTargetForFirstGroup(this->infoFAM.remainPlayers)));

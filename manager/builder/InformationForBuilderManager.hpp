@@ -86,8 +86,8 @@ public:
     bool isInactiveEntity(int entityId);
     friend ostream& operator<<(ostream& os, const InformationForBuilderManager& info) {
         os << "curTick " << info.curTick << endl;
-        os << "current population: " << info.currentPopulation <<endl;
-        os << "providedPopulation" << info.providedPopulation << endl;
+//        os << "current population: " << info.currentPopulation <<endl;
+//        os << "providedPopulation" << info.providedPopulation << endl;
         return os;
     }
 };

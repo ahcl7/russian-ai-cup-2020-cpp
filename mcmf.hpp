@@ -23,14 +23,16 @@ const int OO = (int) 1e5;
 class MCMF {
 public:
     int n, s, t, E;
-    vector<int> adj, nxt, lst, frm, vis, cap, flw, cst, dst;
+    vector<int> adj, nxt, lst, frm, cap, flw, cst, dst, pot;
     int totalCost, totalFlow;
     MCMF();
     void init(int nn, int ss, int tt);
 
     void add(int u, int v, int ca, int co);
 
-    int spfa();
+    void bellman();
+
+    int dijkstra();
 
     int mincost();
 
