@@ -32,6 +32,7 @@ void InformationForBuilderManager::updateBuilders(const PlayerView& playerView) 
         int id = entity.id;
         BuilderTask newTask;
         //TODO: find builders are standing and doing nothing => force him collecting resources
+        //TODO: run if have an attacker can target this builder
         if (!doingTasks.count(id)) {
             //this is new builder, set current task to 'collect resource'
             newTask = BuilderTask(COLLECT_RESOURCE);
@@ -80,6 +81,7 @@ void InformationForBuilderManager::update(const PlayerView &playerView) {
     numberOfMeleeBase = 0;
     numberOfBuilderBase = 0;
     numberOfAttackers = 0;
+    currentBuilderBuildingRangedBase = 0;
     builderPositions.clear();
     inactiveEntities.clear();
     resourcesEntities.clear();
@@ -100,24 +102,29 @@ void InformationForBuilderManager::update(const PlayerView &playerView) {
 
     for (int i = 0; i < playerView.entities.size(); i++) {
         const Entity &entity = playerView.entities[i];
-        if (Utils::isMyEntity(entity) && Utils::isInactiveEntity(entity)) {
+        // inactive entities include all entity that current health < max health, exclude all units
+        if (Utils::isMyEntity(entity) && Utils::isInactiveEntity(entity) && !Utils::getEntityProperties(entity.entityType).canMove) {
             inactiveEntities.push_back(entity);
         }
         if (entity.entityType == RESOURCE) {
             resourcesEntities.push_back(entity);
         }
     }
-    cerr << "before update bitmap" << endl;
+//    cerr << "before update bitmap" << endl;
     bitmap.update(playerView);
     // cover all in building bases/houses
     for(auto& p: doingTasks) {
         BuilderTask task = p.second;
         if (task.taskType == BUILD) {
             bitmap.cover(task.targetPosition, Utils::getEntitySize(task.targetEntityType));
+            if (task.targetEntityType == RANGED_BASE) {
+                currentBuilderBuildingRangedBase ++;
+            }
         }
     }
+//    needRangedBase = (numberOfRangedBase + currentBuilderBuildingRangedBase == 0) && builderPositions.size() >= MIN_BUILDERS;
+    needRangedBase = (numberOfRangedBase == 0) && builderPositions.size() >= MIN_BUILDERS;
 
-    cerr << "update info Done!" << endl;
     cerr << *this << endl;
     updateBuilders(playerView);
 }

@@ -6,7 +6,7 @@
 #define AICUP_CPP_INFORMATIONFORBUILDERMANAGER_HPP
 
 #include "../../model/Model.hpp"
-#include "../../BitMap.hpp"
+#include "../bitmap/BitMap.hpp"
 #include <vector>
 #include <map>
 #include <iostream>
@@ -69,6 +69,8 @@ public:
     int numberOfBuilderBase;
     int numberOfRangedBase;
     int numberOfMeleeBase;
+    int currentBuilderBuildingRangedBase;
+    bool needRangedBase;
     BitMap bitmap;
     map<int, Vec2Int> builderPositions;
     map<int, BuilderTask> doingTasks;
@@ -84,8 +86,8 @@ public:
     bool isInactiveEntity(int entityId);
     friend ostream& operator<<(ostream& os, const InformationForBuilderManager& info) {
         os << "curTick " << info.curTick << endl;
-        os << "current population: " << info.currentPopulation <<endl;
-        os << "providedPopulation" << info.providedPopulation << endl;
+//        os << "current population: " << info.currentPopulation <<endl;
+//        os << "providedPopulation" << info.providedPopulation << endl;
         return os;
     }
 };
