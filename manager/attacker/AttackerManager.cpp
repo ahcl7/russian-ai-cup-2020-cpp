@@ -111,10 +111,10 @@ vector<Entity> AttackerManager::attack(vector<Entity> &attackers, Vec2Int target
 //    vector<pair<int, int>> vt1 = mcmf1.getPairs(m, n);
     if (attackList.size() < MINIMUM_NUMBER_OF_ATTACKER_TO_ATTACK) {
         if (targetPosition.x == Utils::mapSize - BASE_CENTER) {
-            targetPosition.x = Utils::mapSize / 2;
+            targetPosition.x = Utils::mapSize / 2 - 5;
         }
         if (targetPosition.y == Utils::mapSize - BASE_CENTER) {
-            targetPosition.y = Utils::mapSize / 2;
+            targetPosition.y = Utils::mapSize / 2 - 5;
         }
     }
     for (auto &a: attackList) {

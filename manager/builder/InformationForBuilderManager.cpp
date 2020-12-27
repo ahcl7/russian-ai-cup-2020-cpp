@@ -124,7 +124,7 @@ void InformationForBuilderManager::update(const PlayerView &playerView) {
     }
 //    needRangedBase = (numberOfRangedBase + currentBuilderBuildingRangedBase == 0) && builderPositions.size() >= MIN_BUILDERS;
     needRangedBase = (numberOfRangedBase == 0) && builderPositions.size() >= MIN_BUILDERS;
-
+    needTurret = (this->curTick > 100 && (((this->curTick - 100) % 40 ==0) || (this->curTick - 100) % 25) == 0 && this->currentResource > 500);
     cerr << *this << endl;
     updateBuilders(playerView);
 }

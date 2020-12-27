@@ -5,26 +5,26 @@
 #include "BuilderManager.hpp"
 #include <iostream>
 
-BuilderManager::BuilderManager(const PlayerView& playerView) {
+BuilderManager::BuilderManager(const PlayerView &playerView) {
     infoFBM = InformationForBuilderManager(playerView);
     this->mcmf = MCMF();
     this->update(playerView);
 
 }
 
-Entity BuilderManager::getClosetResource(Vec2Int position, vector <Entity> resourceEntities) {
+Entity BuilderManager::getClosetResource(Vec2Int position, vector<Entity> resourceEntities) {
     int MinDis = INF;
     Entity res;
     for (auto &p:resourceEntities) {
         bool ok = false;
-        for(int i = -1 ; i < 2; i++) {
-            for(int j = -1 ; j < 2; j++) {
+        for (int i = -1; i < 2; i++) {
+            for (int j = -1; j < 2; j++) {
                 if (abs(i) + abs(j) == 1) {
                     int x = p.position.x + i;
                     int y = p.position.y + j;
                     if (x < 0 || y < 0 || x >= Utils::mapSize - 1 || y >= Utils::mapSize - 1) continue;
                     ok |= (this->infoFBM.bitmap.isFowEnable ? this->infoFBM.bitmap.bitmap_fow[x][y] == EMPTY
-                            : this->infoFBM.bitmap.bitmap[x].test(y) == 0);
+                                                            : this->infoFBM.bitmap.bitmap[x].test(y) == 0);
                 }
             }
         }
@@ -43,10 +43,10 @@ EntityAction BuilderManager::getAction(int entityId) {
     // every entity should be assigned a task before getAction is invoked
     BuilderTask currentTask = this->infoFBM.doingTasks[entityId];
 
-    shared_ptr <MoveAction> moveAction = nullptr;
-    shared_ptr <BuildAction> buildAction = nullptr;
-    shared_ptr <AttackAction> attackAction = nullptr;
-    shared_ptr <RepairAction> repairAction = nullptr;
+    shared_ptr<MoveAction> moveAction = nullptr;
+    shared_ptr<BuildAction> buildAction = nullptr;
+    shared_ptr<AttackAction> attackAction = nullptr;
+    shared_ptr<RepairAction> repairAction = nullptr;
     if (currentTask.taskType == COLLECT_RESOURCE) {
         // continue collect resource
 
@@ -68,7 +68,7 @@ EntityAction BuilderManager::getAction(int entityId) {
         }
         vector<EntityType> targets;
         targets.push_back(RESOURCE);
-        shared_ptr<AutoAttack> autoAttack = shared_ptr<AutoAttack>(new AutoAttack(10,targets));
+        shared_ptr<AutoAttack> autoAttack = shared_ptr<AutoAttack>(new AutoAttack(10, targets));
         attackAction = shared_ptr<AttackAction>(new AttackAction(nullptr, autoAttack));
     }
     if (currentTask.taskType == REPAIR) {
@@ -85,7 +85,8 @@ EntityAction BuilderManager::getAction(int entityId) {
     }
 
     if (currentTask.taskType == BUILD) {
-        if (this->infoFBM.builderPositions[entityId] == Vec2Int(currentTask.targetPosition.x - 1, currentTask.targetPosition.y)) {
+        if (this->infoFBM.builderPositions[entityId] ==
+            Vec2Int(currentTask.targetPosition.x - 1, currentTask.targetPosition.y)) {
             buildAction = shared_ptr<BuildAction>(
                     new BuildAction(currentTask.targetEntityType, currentTask.targetPosition));
         } else {
@@ -99,8 +100,8 @@ EntityAction BuilderManager::getAction(int entityId) {
     return EntityAction(moveAction, buildAction, attackAction, repairAction);
 };
 
-void BuilderManager::implement(vector<Entity>& buildersCanBeInvolvedForTasks,
-                               vector<BuilderTask>& tasks, vector <pair<int, int>>& assignment) {
+void BuilderManager::implement(vector<Entity> &buildersCanBeInvolvedForTasks,
+                               vector<BuilderTask> &tasks, vector<pair<int, int>> &assignment) {
 //    cerr <<"implementing tasks" << endl;
     for (int i = 0; i < assignment.size(); i++) {
         int u = assignment[i].first;
@@ -114,9 +115,9 @@ void BuilderManager::implement(vector<Entity>& buildersCanBeInvolvedForTasks,
 //    }
 }
 
-void BuilderManager::assignTasks(vector <BuilderTask>& tasks) {
+void BuilderManager::assignTasks(vector<BuilderTask> &tasks) {
 //    cerr <<"assignTasks" << endl;
-    vector <Entity> buildersCanBeInvolvedForTasks;
+    vector<Entity> buildersCanBeInvolvedForTasks;
 
     int totalBuilderCnt = this->infoFBM.builders.size();
     for (int i = 0; i < this->infoFBM.builders.size(); i++) {
@@ -129,14 +130,14 @@ void BuilderManager::assignTasks(vector <BuilderTask>& tasks) {
         return a.priority > b.priority;
     });
     // need cost function here
-    vector <EntityType> basesBuildingTasks;
+    vector<EntityType> basesBuildingTasks;
     for (int i = 0; i < tasks.size(); i++) {
         if (tasks[i].taskType == BUILD) {
             basesBuildingTasks.push_back(tasks[i].targetEntityType);
         }
     }
 //    cerr <<"before get best positions" << endl;
-    vector <Vec2Int> positions = infoFBM.bitmap.getBestPositions(basesBuildingTasks);
+    vector<Vec2Int> positions = infoFBM.bitmap.getBestPositions(basesBuildingTasks);
 //    cerr << "found some good positions" << endl;
 //    for(auto&p:positions) {
 //        cerr << p.x <<" " << p.y << endl;
@@ -161,7 +162,7 @@ void BuilderManager::assignTasks(vector <BuilderTask>& tasks) {
         for (int j = 0; j < m; j++) {
             if (!(tasks[j].targetPosition == SPECIAL_POINT)) {
                 this->mcmf.add(i, j + n, 1,
-                          Utils::distance(buildersCanBeInvolvedForTasks[i].position, tasks[j].targetPosition));
+                               Utils::distance(buildersCanBeInvolvedForTasks[i].position, tasks[j].targetPosition));
             }
         }
     }
@@ -186,7 +187,7 @@ void BuilderManager::assignTasks(vector <BuilderTask>& tasks) {
     this->mcmf.add(ss1, ss, max(0, totalBuilderCnt / 2 - numberOfBuilderIsDoingHardTask), 0);
 //    cerr << "before running mcmf" << endl;
 
-    vector <pair<int, int>> assignment = this->mcmf.getPairs(n, m);
+    vector<pair<int, int>> assignment = this->mcmf.getPairs(n, m);
     implement(buildersCanBeInvolvedForTasks, tasks, assignment);
 }
 
@@ -204,26 +205,25 @@ void BuilderManager::createAndAssignTasks() {
     int numberOfHouseIsBuilding = infoFBM.getNumberOfHouseIsBuilding();
     expectedNumberOfHouse = max(0, expectedNumberOfHouse - numberOfHouseIsBuilding);
     //involve builder to repair inactive entities
-    vector <BuilderTask> tasks;
+    vector<BuilderTask> tasks;
 //    cerr << "there are " << infoFBM.inactiveEntities.size() << "inactive entities " << endl;
     for (int i = 0; i < infoFBM.inactiveEntities.size(); i++) {
-        if (infoFBM.inactiveEntities[i].entityType == HOUSE) {
-            int currentRepairingNumber = infoFBM.getNumberOfBuilderRepairingFor(infoFBM.inactiveEntities[i].id);
-            int expectedNumberOfBuilderForRepair = max(0, min(infoFBM.currentPopulation / 2, NUMBER_OF_BUILDER_FOR_HOUSE) - currentRepairingNumber);
-            tasks.push_back(BuilderTask(REPAIR, expectedNumberOfBuilderForRepair, AS_SOON_AS_POSSIBLE,
-                                        infoFBM.inactiveEntities[i].id, infoFBM.inactiveEntities[i].entityType,
-                                        infoFBM.inactiveEntities[i].position));
-        } else {
-            //TODO: should count number of builder is repairing this base
-            int currentRepairingNumber = infoFBM.getNumberOfBuilderRepairingFor(infoFBM.inactiveEntities[i].id);
-            int expectedNumberOfBuilderForRepair = max(0, min(infoFBM.currentPopulation / 2, NUMBER_OF_BUILDER_FOR_BASES) - currentRepairingNumber);
-            tasks.push_back(BuilderTask(REPAIR, expectedNumberOfBuilderForRepair, CAN_BE_DELAYED,
-                                        infoFBM.inactiveEntities[i].id, infoFBM.inactiveEntities[i].entityType,
-                                        infoFBM.inactiveEntities[i].position));
-        }
+        EntityType entityType = infoFBM.inactiveEntities[i].entityType;
+        int numberOfBuilderShouldBeInvolved = entityType == HOUSE ? NUMBER_OF_BUILDER_FOR_HOUSE :
+                                              (entityType == TURRET ? NUMBER_OF_BUILDER_FOR_TURRET
+                                                                    : NUMBER_OF_BUILDER_FOR_BASES);
+        TaskPriority priority = (entityType == HOUSE ? AS_SOON_AS_POSSIBLE : CAN_BE_DELAYED);
+        int currentRepairingNumber = infoFBM.getNumberOfBuilderRepairingFor(infoFBM.inactiveEntities[i].id);
+        int expectedNumberOfBuilderForRepair = max(0,
+                                                   min(infoFBM.currentPopulation / 2, numberOfBuilderShouldBeInvolved) -
+                                                   currentRepairingNumber);
+        tasks.push_back(BuilderTask(REPAIR, expectedNumberOfBuilderForRepair, priority,
+                                    infoFBM.inactiveEntities[i].id, infoFBM.inactiveEntities[i].entityType,
+                                    infoFBM.inactiveEntities[i].position));
     }
 //    cerr <<"expect number of house: " << expectedNumberOfHouse << endl;
-    for (int i = 0; i < expectedNumberOfHouse; i++) tasks.push_back(BuilderTask(BUILD, 1, AS_SOON_AS_POSSIBLE, -1, HOUSE));
+    for (int i = 0; i < expectedNumberOfHouse; i++)
+        tasks.push_back(BuilderTask(BUILD, 1, AS_SOON_AS_POSSIBLE, -1, HOUSE));
     // TODO: need some logic here
     bool needBuilderBase = false;
 
@@ -235,9 +235,14 @@ void BuilderManager::createAndAssignTasks() {
     if (needBuilderBase) {
         tasks.push_back(BuilderTask(BUILD, 1, IMMEDIATE, -1, BUILDER_BASE));
     }
-    if (this->infoFBM.needRangedBase && this->infoFBM.currentResource >= Utils::getEntityCost(RANGED_BASE) &&
+    if ((this->infoFBM.needRangedBase && this->infoFBM.currentResource >= Utils::getEntityCost(RANGED_BASE)
+         || this->infoFBM.currentResource > 2500) &&
         this->infoFBM.currentBuilderBuildingRangedBase == 0) {
         tasks.push_back(BuilderTask(BUILD, 1, CAN_BE_DELAYED, -1, RANGED_BASE));
+    }
+
+    if ((this->infoFBM.needTurret)) {
+        tasks.push_back(BuilderTask(BUILD, 1, CAN_BE_DELAYED, -1, TURRET));
     }
     if (needMeleeBase) {
         tasks.push_back(BuilderTask(BUILD, 1, CAN_BE_DELAYED, -1, MELEE_BASE));

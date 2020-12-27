@@ -137,7 +137,7 @@ vector <Vec2Int> BitMap::getBestPositions(vector <EntityType> entityTypes) {
     vector <Vec2Int> res;
     for (int i = 0; i < entityTypes.size(); i++) {
         EntityType entityType = entityTypes[i];
-        if (entityType == HOUSE) {
+        if (entityType == HOUSE || entityType == TURRET) {
             if (se.empty()) {
                 res.push_back(SPECIAL_POINT);
             } else {
