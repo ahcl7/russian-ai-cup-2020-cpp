@@ -12,25 +12,29 @@ BuilderManager::BuilderManager(const PlayerView &playerView) {
 
 }
 
-Entity BuilderManager::getClosetResource(Vec2Int position, vector<Entity> resourceEntities) {
+Vec2Int BuilderManager::getClosetResource(Vec2Int position, vector<Entity> resourceEntities) {
     int MinDis = INF;
-    Entity res;
+    Vec2Int res = Utils::getResourceOptimalCoordinate();
     for (auto &p:resourceEntities) {
         bool ok = false;
-        for (int i = -1; i < 2; i++) {
-            for (int j = -1; j < 2; j++) {
+        for (int i = -1; i < 2 && !ok; i++) {
+            for (int j = -1; j < 2 && !ok; j++) {
                 if (abs(i) + abs(j) == 1) {
                     int x = p.position.x + i;
                     int y = p.position.y + j;
+                    if (Vec2Int(x, y) == position) {
+                        ok = true;
+                        break;
+                    }
                     if (x < 0 || y < 0 || x >= Utils::mapSize - 1 || y >= Utils::mapSize - 1) continue;
-                    ok |= (this->infoFBM.bitmap.isFowEnable ? this->infoFBM.bitmap.bitmap_fow[x][y] == EMPTY
-                                                            : this->infoFBM.bitmap.bitmap[x].test(y) == 0);
+                    ok |= (this->infoFBM.bitmap.isFowEnable ? this->infoFBM.bitmap._bitmap_fow[x][y] == EMPTY
+                                                            : this->infoFBM.bitmap._bitmap[x].test(y) == 0);
                 }
             }
         }
         if (ok && Utils::distance(position, p.position) < MinDis) {
             MinDis = Utils::distance(position, p.position);
-            res = p;
+            res = p.position;
         }
     }
     return res;
@@ -52,9 +56,9 @@ EntityAction BuilderManager::getAction(int entityId) {
             //TODO: upgrade strategy: closest resource may be blocked by other builders, this cause waste of resource.
             //TODO: can limit number of builders, many builder is not really good because cost is increasing rapidly
             //TODO: keep the number of builder = number of attackers = ranged + melee (ranged should be more than melee)
-            Entity p = getClosetResource(this->infoFBM.builderPositions[entityId], this->infoFBM.resourcesEntities);
-            if (Utils::distance(this->infoFBM.builderPositions[entityId], p.position) > RESOURCE_RANGE) {
-                moveAction = shared_ptr<MoveAction>(new MoveAction(p.position, true, true));
+            Vec2Int p = getClosetResource(this->infoFBM.builderPositions[entityId], this->infoFBM.resourcesEntities);
+            if (Utils::distance(this->infoFBM.builderPositions[entityId], p) > RESOURCE_RANGE) {
+                moveAction = shared_ptr<MoveAction>(new MoveAction(p, true, true));
 
             } else {
                 // TODO: make a move if builder is not moving
