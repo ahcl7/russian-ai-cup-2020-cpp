@@ -3,7 +3,7 @@
 //
 #include "InformationForBuilderManager.hpp"
 
-InformationForBuilderManager::InformationForBuilderManager(const PlayerView& playerView) {
+InformationForBuilderManager::InformationForBuilderManager(const PlayerView &playerView) {
     currentResource = 0;
     currentPopulation = 0;
     providedPopulation = 0;
@@ -16,17 +16,17 @@ InformationForBuilderManager::InformationForBuilderManager(const PlayerView& pla
 };
 
 bool InformationForBuilderManager::isInactiveEntity(int entityId) {
-    for(int i = 0 ; i < inactiveEntities.size(); i++) {
+    for (int i = 0; i < inactiveEntities.size(); i++) {
         if (inactiveEntities[i].id == entityId) return true;
     }
     return false;
 }
 
-void InformationForBuilderManager::updateBuilders(const PlayerView& playerView) {
-    map<int, BuilderTask> newDoingTasks;
+void InformationForBuilderManager::updateBuilders(const PlayerView &playerView) {
+    unordered_map<int, BuilderTask> newDoingTasks;
     vector<Entity> newBuilders;
-    for(int i = 0 ; i < playerView.entities.size(); i++) {
-        const Entity& entity = playerView.entities[i];
+    for (int i = 0; i < playerView.entities.size(); i++) {
+        const Entity &entity = playerView.entities[i];
         if (!Utils::isMyEntity(entity) || entity.entityType != BUILDER_UNIT) continue;
         newBuilders.push_back(entity);
         int id = entity.id;
@@ -92,7 +92,7 @@ void InformationForBuilderManager::update(const PlayerView &playerView) {
         if (entity.entityType == BUILDER_UNIT) {
             builderPositions[entity.id] = entity.position;
         }
-        if (entityType == RANGED_UNIT || entityType == MELEE_UNIT) numberOfAttackers ++;
+        if (entityType == RANGED_UNIT || entityType == MELEE_UNIT) numberOfAttackers++;
         currentPopulation += Utils::getEntityProperties(entityType).populationUse;
         providedPopulation += Utils::getEntityProperties(entityType).populationProvide;
         if (entityType == BUILDER_BASE) numberOfBuilderBase++;
@@ -103,44 +103,49 @@ void InformationForBuilderManager::update(const PlayerView &playerView) {
     for (int i = 0; i < playerView.entities.size(); i++) {
         const Entity &entity = playerView.entities[i];
         // inactive entities include all entity that current health < max health, exclude all units
-        if (Utils::isMyEntity(entity) && Utils::isInactiveEntity(entity) && !Utils::getEntityProperties(entity.entityType).canMove) {
+        if (Utils::isMyEntity(entity) && Utils::isInactiveEntity(entity) &&
+            !Utils::getEntityProperties(entity.entityType).canMove) {
             inactiveEntities.push_back(entity);
+            if (entity.entityType == RANGED_BASE) {
+                currentBuilderBuildingRangedBase++;
+            }
         }
         if (entity.entityType == RESOURCE) {
             resourcesEntities.push_back(entity);
         }
     }
-//    cerr << "before update bitmap" << endl;
     bitmap.update(playerView);
     // cover all in building bases/houses
-    for(auto& p: doingTasks) {
+    for (auto &p: doingTasks) {
         BuilderTask task = p.second;
         if (task.taskType == BUILD) {
             bitmap.cover(task.targetPosition, Utils::getEntitySize(task.targetEntityType));
             if (task.targetEntityType == RANGED_BASE) {
-                currentBuilderBuildingRangedBase ++;
+                currentBuilderBuildingRangedBase++;
             }
         }
     }
 //    needRangedBase = (numberOfRangedBase + currentBuilderBuildingRangedBase == 0) && builderPositions.size() >= MIN_BUILDERS;
     needRangedBase = (numberOfRangedBase == 0) && builderPositions.size() >= MIN_BUILDERS;
-    needTurret = (this->curTick > 100 && (((this->curTick - 100) % 40 ==0) || (this->curTick - 100) % 25) == 0 && this->currentResource > 500);
+    needTurret = (this->curTick > 100 && (((this->curTick - 100) % 40 == 0) || (this->curTick - 100) % 25) == 0 &&
+                  this->currentResource > 500);
     cerr << *this << endl;
     updateBuilders(playerView);
 }
 
 int InformationForBuilderManager::getNumberOfBuilderRepairingFor(int entityId) {
     int res = 0;
-    for(auto &p:doingTasks) {
+    for (auto &p:doingTasks) {
         BuilderTask task = p.second;
         if (task.taskType == REPAIR && task.targetId == entityId) res++;
     }
     return res;
 }
+
 int InformationForBuilderManager::getNumberOfHouseIsBuilding() {
     int res = 0;
-    for(auto& p:doingTasks) {
-        if (p.second.taskType == BUILD) res ++;
+    for (auto &p:doingTasks) {
+        if (p.second.taskType == BUILD) res++;
     }
     return res;
 }

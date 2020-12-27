@@ -19,7 +19,7 @@ void BitMap::update(const PlayerView &playerView) {
     isFowEnable = playerView.fogOfWar;
     for (int i = 0; i < n; i++) {
         bitmap[i].reset();
-        for(int j = 0 ; j < bitmap_fow[i].size(); j++) {
+        for (int j = 0; j < bitmap_fow[i].size(); j++) {
             bitmap_fow[i][j] = UNKNOWN;
         }
     }
@@ -28,7 +28,7 @@ void BitMap::update(const PlayerView &playerView) {
         EntityType entityType = entity.entityType;
         Vec2Int position = entity.position;
         int entitySize = Utils::getEntitySize(entityType);
-        if (position.x + entitySize < n && position.y + entitySize < n) entitySize ++;
+        if (position.x + entitySize < n && position.y + entitySize < n) entitySize++;
         // mark all cell which is covered by a base/house to true
         for (int j = 0; j < entitySize; j++) {
             for (int k = 0; k < entitySize; k++) {
@@ -36,17 +36,13 @@ void BitMap::update(const PlayerView &playerView) {
             }
         }
 
-        // mark all cell which is covered by a base/house to 'OCCUPIED'
-//        if (!Utils::getEntityProperties(entityType).canMove) {
-            for (int j = 0; j < entitySize; j++) {
-                for (int k = 0; k < entitySize; k++) {
-                    bitmap_fow[position.x + j][position.y + k] = OCCUPIED;
-                }
+        for (int j = 0; j < entitySize; j++) {
+            for (int k = 0; k < entitySize; k++) {
+                bitmap_fow[position.x + j][position.y + k] = OCCUPIED;
             }
-//        }
+        }
     }
 
-//    cerr <<" middle of bitmap update function " << endl;
 
     // mark all unknown cell inside current sight range to emtpy
     for (int i = 0; i < playerView.entities.size(); i++) {
@@ -104,9 +100,9 @@ bool BitMap::isBuilt(Vec2Int position, int entitySize) {
     return cnt == Utils::sqr(entitySize);
 }
 
-vector <Vec2Int> BitMap::getPositionsForNewEntity(EntityType entityType) {
+vector<Vec2Int> BitMap::getPositionsForNewEntity(EntityType entityType) {
     int entitySize = Utils::getEntitySize(entityType);
-    vector <Vec2Int> res;
+    vector<Vec2Int> res;
     for (int i = 1; i < Utils::mapSize - entitySize; i++) {
         for (int j = 1; j < Utils::mapSize - entitySize; j++) {
             if (canBuild(Vec2Int(i, j), entitySize)) res.push_back(Vec2Int(i, j));
@@ -115,12 +111,9 @@ vector <Vec2Int> BitMap::getPositionsForNewEntity(EntityType entityType) {
     return res;
 }
 
-vector <Vec2Int> BitMap::getBestPositions(vector <EntityType> entityTypes) {
-//    cerr << "get best position" << endl;
-//    cerr << "test utils" << Utils::entityProperties.size() << endl;
+vector<Vec2Int> BitMap::getBestPositions(vector<EntityType> entityTypes) {
     int houseSize = Utils::getEntitySize(HOUSE) + 1;
     int otherBaseSize = Utils::getEntitySize(RANGED_BASE) + 1;
-//    cerr << "before create comparator" << endl;
     auto cmp = [](Vec2Int a, Vec2Int b) {
         int t = a.x + a.y;
         int t1 = b.x + b.y;
@@ -128,13 +121,10 @@ vector <Vec2Int> BitMap::getBestPositions(vector <EntityType> entityTypes) {
         return make_pair(a.x, a.y) < make_pair(b.x, b.y);
     };
     set<Vec2Int, decltype(cmp)> se(cmp);
-//    cerr <<"before add data to first set" << endl;
     for (auto p:getPositionsForNewEntity(HOUSE)) se.insert(p);
-//    cerr << "after init frist set" << endl;
     set<Vec2Int, decltype(cmp)> se1(cmp);
     for (auto p:getPositionsForNewEntity(RANGED_BASE)) se1.insert(p);
-//    cerr <<"after init two sets" << endl;
-    vector <Vec2Int> res;
+    vector<Vec2Int> res;
     for (int i = 0; i < entityTypes.size(); i++) {
         EntityType entityType = entityTypes[i];
         if (entityType == HOUSE || entityType == TURRET) {
@@ -169,7 +159,7 @@ vector <Vec2Int> BitMap::getBestPositions(vector <EntityType> entityTypes) {
 }
 
 void BitMap::cover(Vec2Int position, int size) {
-    size ++;
+    size++;
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
 //            verify(position.x + i, position.y + j, _bitmap.size(), _bitmap[0].size());

@@ -48,9 +48,6 @@ EntityAction BuilderManager::getAction(int entityId) {
     shared_ptr<AttackAction> attackAction = nullptr;
     shared_ptr<RepairAction> repairAction = nullptr;
     if (currentTask.taskType == COLLECT_RESOURCE) {
-        // continue collect resource
-
-        // find the closest resource
         if (this->infoFBM.resourcesEntities.size() > 0) {
             //TODO: upgrade strategy: closest resource may be blocked by other builders, this cause waste of resource.
             //TODO: can limit number of builders, many builder is not really good because cost is increasing rapidly
@@ -102,7 +99,6 @@ EntityAction BuilderManager::getAction(int entityId) {
 
 void BuilderManager::implement(vector<Entity> &buildersCanBeInvolvedForTasks,
                                vector<BuilderTask> &tasks, vector<pair<int, int>> &assignment) {
-//    cerr <<"implementing tasks" << endl;
     for (int i = 0; i < assignment.size(); i++) {
         int u = assignment[i].first;
         int v = assignment[i].second;
@@ -110,13 +106,9 @@ void BuilderManager::implement(vector<Entity> &buildersCanBeInvolvedForTasks,
         BuilderTask task = tasks[v];
         infoFBM.doingTasks[builderId] = task;
     }
-//    for(auto& p: this->infoFBM.doingTasks) {
-//        cerr << p.first <<" " << p.second << endl;
-//    }
 }
 
 void BuilderManager::assignTasks(vector<BuilderTask> &tasks) {
-//    cerr <<"assignTasks" << endl;
     vector<Entity> buildersCanBeInvolvedForTasks;
 
     int totalBuilderCnt = this->infoFBM.builders.size();
@@ -129,34 +121,26 @@ void BuilderManager::assignTasks(vector<BuilderTask> &tasks) {
     sort(tasks.begin(), tasks.end(), [](BuilderTask a, BuilderTask b) {
         return a.priority > b.priority;
     });
-    // need cost function here
     vector<EntityType> basesBuildingTasks;
     for (int i = 0; i < tasks.size(); i++) {
         if (tasks[i].taskType == BUILD) {
             basesBuildingTasks.push_back(tasks[i].targetEntityType);
         }
     }
-//    cerr <<"before get best positions" << endl;
     vector<Vec2Int> positions = infoFBM.bitmap.getBestPositions(basesBuildingTasks);
-//    cerr << "found some good positions" << endl;
-//    for(auto&p:positions) {
-//        cerr << p.x <<" " << p.y << endl;
-//    }
-//    cerr <<"after get best positions" << endl;
-    assert(positions.size() == basesBuildingTasks.size());
     int cur = 0;
     for (int i = 0; i < tasks.size(); i++) {
         if (tasks[i].taskType == BUILD) {
             tasks[i].targetPosition = positions[cur++];
         }
     }
-//    cerr <<"Before create mcmf graph" << endl;
     //build min cost max flow graph
     int n = buildersCanBeInvolvedForTasks.size();
     int m = tasks.size();
     int ss = n + m;
     int ss1 = ss + 1;
     int tt = ss1 + 1;
+    cerr << "cnt1 " << tt << endl;
     this->mcmf.init(tt + 1, ss1, tt);
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < m; j++) {
@@ -166,7 +150,6 @@ void BuilderManager::assignTasks(vector<BuilderTask> &tasks) {
             }
         }
     }
-//    cerr <<"after pairing" << endl;
     for (int j = 0; j < m; j++) {
         int cost;
         TaskPriority priority = tasks[j].priority;
@@ -178,14 +161,11 @@ void BuilderManager::assignTasks(vector<BuilderTask> &tasks) {
         this->mcmf.add(j + n, tt, tasks[j].numberOfBuildersShouldBeInvolved, cost);
     }
 
-    //TODO: should limit number of builder involved for repairing and building
     for (int i = 0; i < n; i++) {
         this->mcmf.add(ss, i, 1, 0);
     }
     int numberOfBuilderIsDoingHardTask = totalBuilderCnt - buildersCanBeInvolvedForTasks.size();
-//    cerr <<"number of builder is doing hard tasks " << numberOfBuilderIsDoingHardTask << endl;
-    this->mcmf.add(ss1, ss, max(0, totalBuilderCnt / 2 - numberOfBuilderIsDoingHardTask), 0);
-//    cerr << "before running mcmf" << endl;
+    this->mcmf.add(ss1, ss, max(0, min(20, totalBuilderCnt / 2 - numberOfBuilderIsDoingHardTask)), 0);
 
     vector<pair<int, int>> assignment = this->mcmf.getPairs(n, m);
     implement(buildersCanBeInvolvedForTasks, tasks, assignment);
@@ -193,8 +173,6 @@ void BuilderManager::assignTasks(vector<BuilderTask> &tasks) {
 
 void BuilderManager::createAndAssignTasks() {
 
-//    cerr <<"create and assign task" << endl;
-//    cerr << "test Utils" << Utils::entityProperties.size() << endl;
     // house, bases, resources
     int remainProvidedPopulation = infoFBM.providedPopulation - infoFBM.currentPopulation;
     int numberOfHouseCanBeBuilt = infoFBM.currentResource / Utils::getEntityCost(HOUSE);
@@ -206,7 +184,6 @@ void BuilderManager::createAndAssignTasks() {
     expectedNumberOfHouse = max(0, expectedNumberOfHouse - numberOfHouseIsBuilding);
     //involve builder to repair inactive entities
     vector<BuilderTask> tasks;
-//    cerr << "there are " << infoFBM.inactiveEntities.size() << "inactive entities " << endl;
     for (int i = 0; i < infoFBM.inactiveEntities.size(); i++) {
         EntityType entityType = infoFBM.inactiveEntities[i].entityType;
         int numberOfBuilderShouldBeInvolved = entityType == HOUSE ? NUMBER_OF_BUILDER_FOR_HOUSE :
@@ -221,7 +198,6 @@ void BuilderManager::createAndAssignTasks() {
                                     infoFBM.inactiveEntities[i].id, infoFBM.inactiveEntities[i].entityType,
                                     infoFBM.inactiveEntities[i].position));
     }
-//    cerr <<"expect number of house: " << expectedNumberOfHouse << endl;
     for (int i = 0; i < expectedNumberOfHouse; i++)
         tasks.push_back(BuilderTask(BUILD, 1, AS_SOON_AS_POSSIBLE, -1, HOUSE));
     // TODO: need some logic here

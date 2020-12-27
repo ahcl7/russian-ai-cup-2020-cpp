@@ -73,8 +73,8 @@ public:
     bool needRangedBase;
     bool needTurret;
     BitMap bitmap;
-    map<int, Vec2Int> builderPositions;
-    map<int, BuilderTask> doingTasks;
+    unordered_map<int, Vec2Int> builderPositions;
+    unordered_map<int, BuilderTask> doingTasks;
     vector<Entity> builders;
     vector<Entity> inactiveEntities;
     vector<Entity> resourcesEntities;
