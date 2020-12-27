@@ -40,7 +40,7 @@ void InformationForAttackerManager::update(const PlayerView &playerView) {
     curTick = playerView.currentTick;
     numberOfPlayers = playerView.players.size();
     vector<Entity> newAttackers;
-    map <int, Entity> newAttackerMap;
+    unordered_map<int, Entity> newAttackerMap;
     enemyAttackers.clear();
     enemyBuilders.clear();
     enemyHouseAndBases.clear();

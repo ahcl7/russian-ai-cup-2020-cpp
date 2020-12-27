@@ -92,6 +92,7 @@ int MCMF::mincost() {
 }
 
 vector<pair<int, int>> MCMF::getPairs(int n1, int m1) {
+//    auto start = std::chrono::high_resolution_clock::now();
     mincost();
     vector<pair<int, int>> res;
     for (int i = 0; i < E; i += 2) {
@@ -102,6 +103,9 @@ vector<pair<int, int>> MCMF::getPairs(int n1, int m1) {
         }
     }
 
-//    cerr <<"Pairing size:" << res.size() << endl;
+//    auto end = std::chrono::high_resolution_clock::now();
+//    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+//    cerr << "time: " <<  duration.count() <<" ms" << endl;
+
     return res;
 }

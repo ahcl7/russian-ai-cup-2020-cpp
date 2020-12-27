@@ -7,7 +7,6 @@
 
 #include "../../model/Model.hpp"
 #include <vector>
-#include <map>
 #include "../../Utils.hpp"
 #include <set>
 #include <stdlib.h>
@@ -57,9 +56,9 @@ public:
     int numberOfRangedBase;
     vector<Entity> attackers;
     set<int> attackerIds;
-    map<int, Entity> attackerMap;
-    map<int, Vec2Int> attackersPositions;
-    map<int, AttackerTask> doingTasks;
+    unordered_map<int, Entity> attackerMap;
+    unordered_map<int, Vec2Int> attackersPositions;
+    unordered_map<int, AttackerTask> doingTasks;
     vector<Entity> firstAttackerGroup;
     vector<Entity> secondAttackerGroup;
     vector<Entity> scouterGroup;
