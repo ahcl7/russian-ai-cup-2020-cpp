@@ -71,6 +71,7 @@ public:
     int numberOfMeleeBase;
     int currentBuilderBuildingRangedBase;
     bool needRangedBase;
+    bool needTurret;
     BitMap bitmap;
     map<int, Vec2Int> builderPositions;
     map<int, BuilderTask> doingTasks;

@@ -33,11 +33,15 @@ const int MIN_BUILDERS = 15;
 
 const int MAX_SIZE = 82;
 
+const int NUMBER_OF_BUILDER_FOR_TURRET = 3;
+
 const int NUMBER_OF_BUILDER_FOR_HOUSE = 3;
 
 const int NUMBER_OF_BUILDER_FOR_BASES = 6;
 
-const int MINIMUM_NUMBER_OF_ATTACKER = 5;
+const int MINIMUM_NUMBER_OF_ATTACKER = 6;
+
+const int MINIMUM_NUMBER_OF_ATTACKER_TO_ATTACK = 15;
 
 const Vec2Int SPECIAL_POINT = Vec2Int(-1, -1);
 
