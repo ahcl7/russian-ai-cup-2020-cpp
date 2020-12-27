@@ -83,7 +83,7 @@ vector<Entity> AttackerManager::attack(vector<Entity> &attackers, Vec2Int target
     Vec2Int P = Utils::getMediumPoint(enemyAttackerAttackingMe);
     if (enemyAttackerAttackingMe.size() > 0) {
         for (auto &a:attackers) {
-            if (Utils::distance2(a.position, P) < Utils::sqr(Utils::mapSize / 2)) {
+            if (Utils::distance2(a.position, P) < Utils::sqr(Utils::mapSize / 2 - 10)) {
                 defendList.push_back(a);
             } else attackList.push_back(a);
         }
@@ -144,10 +144,10 @@ vector<Entity> AttackerManager::attack(vector<Entity> &attackers, Vec2Int target
     vector<pair<int, int>> vt = mcmf.getPairs(n, m);
     if (attackList.size() < MINIMUM_NUMBER_OF_ATTACKER_TO_ATTACK) {
         if (targetPosition.x == Utils::mapSize - BASE_CENTER) {
-            targetPosition.x = Utils::mapSize / 2 - 5;
+            targetPosition.x = Utils::mapSize / 2 - BASE_CENTER;
         }
         if (targetPosition.y == Utils::mapSize - BASE_CENTER) {
-            targetPosition.y = Utils::mapSize / 2 - 5;
+            targetPosition.y = Utils::mapSize / 2 - BASE_CENTER;
         }
     }
     for (auto &a: attackList) {
@@ -161,7 +161,7 @@ vector<Entity> AttackerManager::attack(vector<Entity> &attackers, Vec2Int target
     for (auto &[u,v]: vt) {
         u = _attackerIndexMap[u];
         v = _enemyAttackerIndexMap[v];
-        this->infoFAM.doingTasks[attackers[u].id] = AttackerTask(ATTACK, enemyAttackers[v].id);
+        this->infoFAM.doingTasks[attackList[u].id] = AttackerTask(ATTACK, enemyAttackers[v].id);
     }
     return getBackList;
 }

@@ -30,7 +30,7 @@ public:
     void createAndAssignTasks();
     void update(const PlayerView& playerView);
     void implement(vector<Entity>& buildersCanBeInvolvedForTasks, vector<BuilderTask>& tasks, vector<pair<int,int>>& assignment);
-    Entity getClosetResource(Vec2Int position, vector <Entity> resourceEntities);
+    Vec2Int getClosetResource(Vec2Int position, vector <Entity> resourceEntities);
 };
 
 #endif //AICUP_CPP_BUILDERMANAGER_HPP

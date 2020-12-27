@@ -54,6 +54,8 @@ void BitMap::update(const PlayerView &playerView) {
             int sightRange = Utils::getEntitySightRange(entityType);
             for (int j = -sightRange; j < sightRange + entitySize; j++) {
                 for (int k = -sightRange; k < sightRange + entitySize; k++) {
+                    int t = abs(j) + abs(k);
+                    if (t > sightRange) continue;
                     int x = position.x + j;
                     int y = position.y + k;
                     if (x >= 0 && y >= 0 && x < n && y < n) {
